@@ -8,7 +8,7 @@ import weka.core.Capabilities;
 import weka.core.Instances;
 
 public class J48KNN extends J48 {
-	final static boolean IGNORE_ATTRIBUTES = false;
+	private boolean ignoreAtt = false;
 	
 	/**
 	 * auto generated serial by eclipse
@@ -21,7 +21,7 @@ public class J48KNN extends J48 {
 		Capabilities result;
 		try {
 			if (!m_reducedErrorPruning)
-				result = new C45PruneableAlg(null, !m_unpruned, m_CF, m_subtreeRaising, !m_noCleanup, m_collapseTree,factory,IGNORE_ATTRIBUTES).getCapabilities();
+				result = new C45PruneableAlg(null, factory ,ignoreAtt, !m_unpruned, m_CF, m_subtreeRaising, !m_noCleanup, m_collapseTree).getCapabilities();
 			else
 				throw new NotImplementedException();
 			//				result = new PruneableClassifierTree(null, !m_unpruned, m_numFolds, !m_noCleanup, m_Seed).getCapabilities();
@@ -47,8 +47,8 @@ public class J48KNN extends J48 {
 		else
 			modSelection = new C45ModelSelection(m_minNumObj, instances, m_useMDLcorrection);
 		if (!m_reducedErrorPruning)
-			m_root = new C45PruneableAlg(modSelection, !m_unpruned, m_CF,
-					m_subtreeRaising, !m_noCleanup, m_collapseTree,factory,IGNORE_ATTRIBUTES);
+			m_root = new C45PruneableAlg(modSelection, factory, ignoreAtt, !m_unpruned, m_CF,
+					m_subtreeRaising, !m_noCleanup, m_collapseTree );
 		else
 			throw new NotImplementedException();
 //			m_root = new PruneableClassifierTree(modSelection, !m_unpruned, m_numFolds,
@@ -61,4 +61,21 @@ public class J48KNN extends J48 {
 		}
 	}
 
+	
+	@Override
+	public String globalInfo() {
+	    return  "HW1 Tree(Alg) ";
+	}
+	
+	@Override
+	public String toString() {
+		 return  "HW1 Tree(Alg) ";
+	}
+	
+	public boolean getIgnoreAtt() {
+		return ignoreAtt;
+	}
+	public void setIgnoreAtt(boolean ignoreAtt) {
+		this.ignoreAtt=ignoreAtt ;
+	}
 }
