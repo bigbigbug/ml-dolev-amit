@@ -46,7 +46,7 @@ public class C45PruneableAlg extends C45PruneableClassifierTree {
 
 		if (factory == null)
 			throw new IllegalArgumentException(
-					"Must procide a non-null factory");
+					"Must provide a non-null factory");
 		this.factory = factory;
 	}
 
@@ -117,7 +117,9 @@ public class C45PruneableAlg extends C45PruneableClassifierTree {
 			}
 			Instances i = new Instances(innerClassifierData);
 			tempInstance.setDataset(i);
-			return weight * leafClassifier.classifyInstance(tempInstance);
+			
+			int knnIdx = (int)Math.round(leafClassifier.classifyInstance(tempInstance));
+			return super.handleLeaf(classIndex,instance,weight) * (knnIdx == classIndex ? 1 : 0);
 		}
 	}
 

@@ -15,7 +15,7 @@ public class KNNFactory implements ClassifierFactory, Serializable {
 	@Override
 	//TODO: generating nearest neighbor with cross validation. A change might be needed
 	public Classifier getClassifier() {
-		return new IBk();
+		return new IBk(1);
 	}
 
 }
