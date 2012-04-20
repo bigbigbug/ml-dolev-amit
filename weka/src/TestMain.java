@@ -60,11 +60,14 @@ public class TestMain {
 		}
 
 		public void finalize() throws IOException {
+			System.out.println("DONE!! Ran total of " + exp + " experiments!");
+			System.out.println("Results:");
 			for (int i = 0; i < expNames.length; i++) {
 				correctRatings[i].append(']');
 				System.out.println(expNames[i] + ": " + correctRatings[i].toString());
 				confusionMatrices[i].close();
 			}
+			System.out.println("see con fusion matrices in dir" + RESULTS_DIR);
 		}
 	}
 
@@ -94,30 +97,30 @@ public class TestMain {
 				if (tempCount++ == 1) break; //TODO: nocommit
 				Evaluation eval;
 				System.out.println(file.getCanonicalPath());
-				Classifier classifier1 = new J48KNN();
-				
-//				classifier1.setIgnoreAtt(true);
-				Classifier classifier2 = new J48KNN();
-//				classifier2.setIgnoreAtt(false);
+				J48KNN classifier1 = new J48KNN();
+				classifier1.setIgnoreAtt(true);
+				J48KNN classifier2 = new J48KNN();
+				classifier2.setIgnoreAtt(false);
 
 				DataSource source = new DataSource(file.getCanonicalPath());
 				Instances data = source.getDataSet();
 				data.setClassIndex(data.numAttributes()-1);
+
 				//ignoring attributes
 				eval = new Evaluation(data);
 				eval.crossValidateModel(classifier1, data, 10, new Random(1));
 				erh.nextResults(eval.confusionMatrix(), eval.pctCorrect());
 
-				System.out.println("pctCorrect=" + eval.pctCorrect() + " pctIncorrect=" + eval.pctIncorrect() + " correct=" + eval.correct() + " incorrect=" + eval.incorrect());
-				for (double[] line : eval.confusionMatrix()) {
-					System.out.println(Arrays.toString(line));
-				}
+//				System.out.println("pctCorrect=" + eval.pctCorrect() + " pctIncorrect=" + eval.pctIncorrect() + " correct=" + eval.correct() + " incorrect=" + eval.incorrect());
+//				for (double[] line : eval.confusionMatrix()) {
+//					System.out.println(Arrays.toString(line));
+//				}
 				
 				
 				//don't ignore attributes
-//				eval = new Evaluation(data);
-//				eval.crossValidateModel(classifier2, data, 10, new Random(1));
-//				erh.nextResults(eval.confusionMatrix(), eval.pctCorrect());
+				eval = new Evaluation(data);
+				eval.crossValidateModel(classifier2, data, 10, new Random(1));
+				erh.nextResults(eval.confusionMatrix(), eval.pctCorrect());
 			}
 		} finally { 
 			erh.finalize();
