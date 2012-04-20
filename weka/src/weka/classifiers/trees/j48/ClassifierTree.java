@@ -23,6 +23,8 @@ package weka.classifiers.trees.j48;
 
 import java.io.Serializable;
 
+import junit.framework.Assert;
+
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
