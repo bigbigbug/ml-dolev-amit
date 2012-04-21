@@ -648,8 +648,8 @@ public class ClassifierTree
     }
   }
 
-  protected double handleLeaf(int classIndex, Instance instance, double weight) throws Exception {
-	  return weight * localModel().classProb(classIndex, instance, -1);
+  protected double handleLeaf(int classIndex, Instance instance, double weight, int treeIndex) throws Exception {
+	  return weight * localModel().classProb(classIndex, instance, treeIndex);
 
 }
 
@@ -669,7 +669,7 @@ public class ClassifierTree
     double prob = 0;
     
     if (m_isLeaf) {
-    	return handleLeaf(classIndex,instance,weight);
+    	return handleLeaf(classIndex,instance,weight,-1);
     } else {
       int treeIndex = localModel().whichSubset(instance);
       if (treeIndex == -1) {
@@ -683,8 +683,10 @@ public class ClassifierTree
 	return prob;
       } else {
 	if (son(treeIndex).m_isEmpty) {
-	  return weight * localModel().classProb(classIndex, instance, 
-						 treeIndex);
+//		  Assert.assertTrue(false);
+		  return handleLeaf(classIndex,instance,weight,treeIndex);
+//	  return weight * localModel().classProb(classIndex, instance, 
+//						 treeIndex);
 	} else {
 	  return son(treeIndex).getProbs(classIndex, instance, weight);
 	}

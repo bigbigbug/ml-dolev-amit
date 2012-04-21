@@ -100,7 +100,7 @@ public class C45PruneableAlg extends C45PruneableClassifierTree {
 	}
 
 	@Override
-	protected double handleLeaf(int classIndex, Instance instance, double weight)
+	protected double handleLeaf(int classIndex, Instance instance, double weight, int treeIndex)
 			throws Exception {
 		if (isAggregatingExamples()) {
 			instancesList.add((Instance) instance.copy());
@@ -119,7 +119,7 @@ public class C45PruneableAlg extends C45PruneableClassifierTree {
 			tempInstance.setDataset(i);
 			
 			int knnIdx = (int)Math.round(leafClassifier.classifyInstance(tempInstance));
-			return super.handleLeaf(classIndex,instance,weight) * (knnIdx == classIndex ? 1 : 0);
+			return super.handleLeaf(classIndex,instance,weight,treeIndex) * (knnIdx == classIndex ? 1 : 0);
 		}
 	}
 

@@ -78,4 +78,8 @@ public class J48KNN extends J48 {
 	public void setIgnoreAtt(boolean ignoreAtt) {
 		this.ignoreAtt=ignoreAtt ;
 	}
+
+	public void setKNN(int k) {
+		((KNNFactory)factory).setKNN(k);
+	}
 }
