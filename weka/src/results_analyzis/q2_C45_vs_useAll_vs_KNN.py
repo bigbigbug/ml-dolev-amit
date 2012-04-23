@@ -45,6 +45,7 @@ for i in range(len(J48)):
     elif J48[i] > useAllAttributes1NN[i]:
         x = (x[0], x[1]+1)
         
+print x
 print binom_test(x, 0,0.4)
 
 print 'J48 = ', average(J48)
