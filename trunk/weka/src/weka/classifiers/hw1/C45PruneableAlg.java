@@ -93,8 +93,7 @@ public class C45PruneableAlg extends C45PruneableClassifierTree {
 	public void buildClassifier(Instances data) throws Exception {
 		super.buildClassifier(data);
 		for (Instance instance : data) {
-			Assert.assertEquals(0., // TODO: nocommit
-					classifyInstance(instance)); // TODO: nocommit
+					classifyInstance(instance); 
 		}
 		buildSecondClassifier(data);
 	}
@@ -119,7 +118,7 @@ public class C45PruneableAlg extends C45PruneableClassifierTree {
 			tempInstance.setDataset(i);
 			
 			int knnIdx = (int)Math.round(leafClassifier.classifyInstance(tempInstance));
-			return super.handleLeaf(classIndex,instance,weight,treeIndex) * (knnIdx == classIndex ? 1 : 0);
+			return super.handleLeaf(classIndex,instance,weight,treeIndex) *  (knnIdx == classIndex ? 1 : 0);
 		}
 	}
 
