@@ -8,7 +8,6 @@ import java.util.Random;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.hw1.J48KNN;
-import weka.classifiers.lazy.IBk;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -17,7 +16,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class TestMain {
 	private static class ExperimentResultsHandler {
 		private final static String RESULTS_DIR = "experiment_results/";
-		private final static String CONFUSION_SUFFIX = "_op_confusion.txt";
+		private final static String CONFUSION_SUFFIX = "_confusion.txt";
 
 		private final String[] expNames;
 		private final FileWriter[] confusionMatrices;
@@ -70,14 +69,18 @@ public class TestMain {
 		}
 	}
 
-	private final static String SOURCE_DIR = "optional_datasets/";
+	private final static String SOURCE_DIR = "required_datasets/";
+	private final static String OPT_SOURCE_DIR = "optional_datasets/";
+	
 
 
 	/**
 	 * @param args
 	 */
+	private final static String ZOO = "zoo.arff";
+	private static final String IONOSPHERE = "ionosphere.arff";
 	public static void main(String[] args) throws Exception {
-		File dir = new File(SOURCE_DIR);
+		File dir = new File(OPT_SOURCE_DIR);
 		File[] files = dir.listFiles(new FileFilter() {
 			@Override
 			public boolean accept(File arg0) {
@@ -87,30 +90,37 @@ public class TestMain {
 		});
 
 
-//		int k = 25;
-//		String[] expNames = { "ignoreAttributes(k="+k+")" , "useAllAttributes(k="+k+")" };
-		String[] expNames = { "J48" , "IBk" };
+		int k = 1;
+		String[] expNames = { "ignoreAttributese" , "useAllAttributes" };
 		ExperimentResultsHandler erh = new ExperimentResultsHandler(expNames);
 		try { 
-//			int tempCount = 0; //TODO: nocommit
+			int tempCount = 0; //TODO: nocommit
 			for (File file : files) {
-//				if (tempCount++ < 4) continue;//break; //TODO: nocommit
+				if (file.getName().equals(IONOSPHERE) == false) continue;
+//				if (tempCount++ == 2) break; //TODO: nocommit
 				Evaluation eval;
 				System.out.println(file.getCanonicalPath());
-				Classifier classifier1 = new J48();
-//				J48KNN classifier1 = new J48KNN();
-//				classifier1.setIgnoreAtt(true);
-//				classifier1.setKNN(k);
 				
-				Classifier classifier2 = new IBk();
-//				J48KNN classifier2 = new J48KNN();
-//				classifier2.setIgnoreAtt(false);
-//				classifier1.setKNN(k);
+				Classifier defClassifier = new J48();
+				
+				
+				J48KNN classifier1 = new J48KNN();
+				classifier1.setIgnoreAtt(true);
+				classifier1.setKNN(k);
+				
+				J48KNN classifier2 = new J48KNN();
+				classifier2.setIgnoreAtt(false);
+				classifier1.setKNN(k);
 
 				DataSource source = new DataSource(file.getCanonicalPath());
 				Instances data = source.getDataSet();
 				data.setClassIndex(data.numAttributes()-1);
-
+				//J48:
+//				eval = new Evaluation(data);
+//				eval.crossValidateModel(defClassifier, data, 10, new Random(1));
+//				erh.nextResults(eval.confusionMatrix(), eval.pctCorrect());
+				
+				
 				//ignoring attributes
 				eval = new Evaluation(data);
 				eval.crossValidateModel(classifier1, data, 10, new Random(1));

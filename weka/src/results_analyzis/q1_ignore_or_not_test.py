@@ -82,7 +82,6 @@ useAllAverages.append(average(useAllAttributes23NN))
 useAllAverages.append(average(useAllAttributes25NN))
 
 
-
 print 'wilcoxon test for use all attributes or ignore all:', wilcoxon(ignoreAttributes3NN, useAllAttributes3NN)
 print 'wilcoxon test for use all attributes or ignore all:', wilcoxon(ignoreAttributes5NN, useAllAttributes5NN)
 print 'wilcoxon test for use all attributes or ignore all:', wilcoxon(ignoreAttributes7NN, useAllAttributes7NN)
