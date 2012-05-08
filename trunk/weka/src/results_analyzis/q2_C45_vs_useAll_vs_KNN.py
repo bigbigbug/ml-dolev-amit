@@ -1,12 +1,11 @@
 from matplotlib.axis import XAxis
 from scipy.stats.mstats_basic import friedmanchisquare
-from scipy.stats.morestats import wilcoxon, binom_test
+from scipy.stats.morestats import wilcoxon, binom_test, shapiro
 from matplotlib.pyplot import *
-from numpy.lib.function_base import average
+from numpy.lib.function_base import average, median
 import numpy
 from matplotlib.mlab import normpdf
 from scipy.stats.stats import ttest_1samp
-
 
 J48 = [98.44097995545657,64.38053097345133,77.87610619469027,94.56366237482118,57.142857142857146,52.13849287169043,70.5,57.77777777777778,73.828125,100.0,73.6842105263158,83.33333333333333,77.02702702702703,69.03846153846153,82.31009365244537,88.95,82.25806451612904,67.12962962962963,100.0,97.05246913580247,80.51282051282051,70.0,96.19047619047619,75.83176396735719,93.33333333333333,99.53095684803002,92.97978700282547,59.602649006622514,84.55114822546973,90.0,72.45862884160756,81.51515151515152,58.125765618619845,92.07920792079207,]
 IBk = [99.10913140311804,52.876106194690266,77.87610619469027,95.13590844062946,63.80952380952381,44.33129667345553,72.0,74.44444444444444,70.18229166666667,100.0,82.45614035087719,79.16666666666667,82.43243243243244,54.26923076923077,76.69094693028096,95.85,76.61290322580645,59.25925925925926,100.0,98.37962962962963,96.41025641025641,66.66666666666667,96.57142857142857,91.46264908976774,93.33333333333333,99.24953095684803,90.78461204086068,62.25165562913907,98.95615866388309,60.0,69.8581560283688,99.29292929292929,65.39403838301348,96.03960396039604,]
@@ -18,9 +17,9 @@ additional_useAllAttributes7NN = [83.41463414634147,79.52,89.16666666666667,75.1
 
 
 def createGraph(list1,list2=None,list3=None,_title='',firstTitle='random_reordering',secondTitle='spins_first',thirdTitle='moves_first'):
-    n, bins, patches = hist([list1,list2,list3],bins=20,normed = 1,
-    color=['crimson', 'orange', 'chartreuse'], label=[firstTitle + " (" + str(average(list1))[0:5] + ")", secondTitle + " (" + str(average(list2))[0:5] + ")", thirdTitle + " (" + str(average(list3))[0:5] + ")"])
-    legend()
+    n, bins, patches = hist([list1,list2,list3],bins=20,normed = 0,
+    color=['crimson', 'orange', 'chartreuse'], label=[firstTitle + " avg=" + str(average(list1))[0:5] + "%" , secondTitle + " avg=" + str(average(list2))[0:5] + "%", thirdTitle + " avg=" + str(average(list3))[0:5] + "%"])
+#    legend()
     title(_title)
 #    mu = average(list1)
 #    sigma = numpy.std(list1) 
@@ -63,7 +62,37 @@ print 'paired t-test for C4.5 and C4.5(7NN): pvalue = %6.4f' %  ttest_1samp(x, 0
 x = [(a-b) for (a,b) in zip(IBk,useAllAttributes7NN)]
 print 'paired t-test for 7NN and C4.5(7NN): pvalue = %6.4f' %  ttest_1samp(x, 0)[1]
 
+
+print 'medians:'
+print 'J48=', median(J48)
+print 'KNN=', median(IBk)
+print 'C4.5(7NN)=', median(useAllAttributes7NN)
+
+print 'shapiro results:'
+print 'J48=', shapiro(J48)
+print 'KNN=', shapiro(IBk)
+print 'C4.5(7NN)=', shapiro(useAllAttributes7NN)
+
+print 'max vals:'
+print 'J48=', max(J48)
+print 'KNN=', max(IBk)
+print 'C4.5(7NN)=', max(useAllAttributes7NN)
+
+print 'min vals:'
+print 'J48=', min(J48)
+print 'KNN=', min(IBk)
+print 'C4.5(7NN)=', min(useAllAttributes7NN)
+
+
+print 'average:'
+print 'J48=', average(J48)
+print 'KNN=', average(IBk)
+print 'C4.5(7NN)=', average(useAllAttributes7NN)
+
+
+
 createGraph(J48, IBk, useAllAttributes7NN, 'J48 -vs- IBk -vs- C4.5(7NN)',firstTitle='J48',secondTitle='IBk',thirdTitle='C4.5(7NN)')
+
 
 #print 'J48 = ', average(J48)
 #print 'IBk = ', average(IBk)

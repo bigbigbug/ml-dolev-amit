@@ -34,7 +34,7 @@ from numpy.lib.function_base import average
 import numpy
 from matplotlib.mlab import normpdf
 
-def createHistogram(list1,list2=None,_title='',firstTitle='random_reordering',secondTitle='spins_first',thirdTitle='moves_first',fourthTitle='interleve_reordering', fifthTitle = 'no_reordering'):
+def createHistogram(list1,list2=None,_title='histogram: % correcteness for required data set',firstTitle='random_reordering',secondTitle='spins_first',thirdTitle='moves_first',fourthTitle='interleve_reordering', fifthTitle = 'no_reordering'):
     n, bins, patches = hist([list1,list2],bins=20,
     color=['crimson', 'orange', ], label=[firstTitle + " (" + str(average(list1))[0:5] + ")", secondTitle + " (" + str(average(list2))[0:5] + ")"])
     legend()
@@ -44,12 +44,13 @@ def createHistogram(list1,list2=None,_title='',firstTitle='random_reordering',se
     show()
 
 from matplotlib.pyplot import plot,show, legend
-def createXYSpreadGraph(list1,list2,name1,name2):
+def createXYSpreadGraph(list1,list2,name1,name2,_title='average % correcteness for required data set'):
     l1=plot(range(1,len(list1)*2+1,2),list1,'blue',label=name1)
     l2=plot(range(1,len(list2)*2+1,2),list2,'red',label=name2)
     xlabel('k')
     ylabel('%correct (average)')
     legend()
+    title(_title)
     show()
 
 ignoreAverages = []
@@ -97,4 +98,4 @@ createXYSpreadGraph(ignoreAverages, useAllAverages, 'ignore used attributes in K
 
 
 #the histogram is not very educational... results are not distributed normally. 
-createHistogram(ignoreAttributes7NN, useAllAttributes7NN, 'histogram: % correcteness ','7NN ignore attributes used by tree', '7NN use all attributes')
+createHistogram(ignoreAttributes7NN, useAllAttributes7NN, 'histogram: % correcteness for required data set','7NN ignore attributes used by tree', '7NN use all attributes')
