@@ -29,6 +29,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /*
  * This class shows how to make a simple authenticated ItemLookup call to the
@@ -41,13 +42,13 @@ public class ItemLookupSample {
     /*
      * Your AWS Access Key ID, as taken from the AWS Your Account page.
      */
-    private static final String AWS_ACCESS_KEY_ID = "YOUR_ACCESS_KEY_ID_HERE";
+    private static final String AWS_ACCESS_KEY_ID = "";
 
     /*
      * Your AWS Secret Key corresponding to the above ID, as taken from the AWS
      * Your Account page.
      */
-    private static final String AWS_SECRET_KEY = "YOUR_SECRET_KEY_HERE";
+    private static final String AWS_SECRET_KEY = "";
 
     /*
      * Use one of the following end-points, according to the region you are
@@ -61,7 +62,7 @@ public class ItemLookupSample {
      *      JP: ecs.amazonaws.jp
      * 
      */
-    private static final String ENDPOINT = "ecs.amazonaws.co.uk";
+    private static final String ENDPOINT = "ecs.amazonaws.com";
 
     /*
      * The Item ID to lookup. The value below was selected for the US locale.
@@ -92,11 +93,18 @@ public class ItemLookupSample {
          */
         System.out.println("Map form example:");
         Map<String, String> params = new HashMap<String, String>();
-        params.put("Service", "AWSECommerceService");
-        params.put("Version", "2009-03-31");
-        params.put("Operation", "ItemLookup");
-        params.put("ItemId", ITEM_ID);
-        params.put("ResponseGroup", "Small");
+//        params.put("Service", "AWSECommerceService");
+//        params.put("Version", "2009-03-31");
+//        params.put("Operation", "ItemLookup");
+//        params.put("ItemId", ITEM_ID);
+//        params.put("ResponseGroup", "Small");
+        
+        params.put("Service","AWSECommerceService");
+        params.put("Version","2011-08-01");
+		params.put("Operation","ItemSearch");
+		params.put("SearchIndex","Books");
+		params.put("Keywords","harry+potter");
+		params.put("AssociateTag","YourAssociateTagHere");
 
         requestUrl = helper.sign(params);
         System.out.println("Signed Request is \"" + requestUrl + "\"");
@@ -105,18 +113,21 @@ public class ItemLookupSample {
         System.out.println("Signed Title is \"" + title + "\"");
         System.out.println();
 
-        /* Here is an example with string form, where the requests parameters have already been concatenated
-         * into a query string. */
-        System.out.println("String form example:");
-        String queryString = "Service=AWSECommerceService&Version=2009-03-31&Operation=ItemLookup&ResponseGroup=Small&ItemId="
-                + ITEM_ID;
-        requestUrl = helper.sign(queryString);
-        System.out.println("Request is \"" + requestUrl + "\"");
+        NodeList ids = fetchItemIDs(requestUrl);
+        for (int i = 0; i < ids.getLength(); i++) {
+			System.out.println(ids.item(i).getTextContent());
+			params = new HashMap<String, String>();
+	        params.put("Operation", "ItemLookup");
+	        params.put("ItemId", ids.item(i).getTextContent());	        
+	        params.put("Service","AWSECommerceService");
+	        params.put("Version","2011-08-01");
+			params.put("AssociateTag","YourAssociateTagHere");
+			requestUrl = helper.sign(params);
+	        System.out.println("Signed Request is \"" + requestUrl + "\"");
 
-        title = fetchTitle(requestUrl);
-        System.out.println("Title is \"" + title + "\"");
-        System.out.println();
-
+	        title = fetchTitle(requestUrl);
+	        System.out.println("Signed Title is \"" + title + "\"");
+		}
     }
 
     /*
@@ -135,6 +146,18 @@ public class ItemLookupSample {
             throw new RuntimeException(e);
         }
         return title;
+    }
+    private static NodeList fetchItemIDs(String requestUrl) {
+    	NodeList ids = null;
+    	try {
+    		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    		DocumentBuilder db = dbf.newDocumentBuilder();
+    		Document doc = db.parse(requestUrl);
+    		ids = doc.getElementsByTagName("ASIN");
+    	} catch (Exception e) {
+    		throw new RuntimeException(e);
+    	}
+    	return ids;
     }
 
 }
