@@ -21,8 +21,11 @@
 
 package com.amazon.advertising.api.sample;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -42,13 +45,13 @@ public class ItemLookupSample {
     /*
      * Your AWS Access Key ID, as taken from the AWS Your Account page.
      */
-    private static final String AWS_ACCESS_KEY_ID = "";
+    private static final String AWS_ACCESS_KEY_ID;
 
     /*
      * Your AWS Secret Key corresponding to the above ID, as taken from the AWS
      * Your Account page.
      */
-    private static final String AWS_SECRET_KEY = "";
+    private static final String AWS_SECRET_KEY;
 
     /*
      * Use one of the following end-points, according to the region you are
@@ -64,13 +67,23 @@ public class ItemLookupSample {
      */
     private static final String ENDPOINT = "ecs.amazonaws.com";
 
-    /*
-     * The Item ID to lookup. The value below was selected for the US locale.
-     * You can choose a different value if this value does not work in the
-     * locale of your choice.
-     */
-    private static final String ITEM_ID = "0545010225";
-
+    private static final Properties config = new Properties();
+    private static final String CONFIG_FILE_LOCATION = "../AMAZONEID.txt";
+    
+    static {
+    	File propsFile = new File(CONFIG_FILE_LOCATION);
+        FileInputStream fis;
+		try {
+			fis = new FileInputStream(propsFile);
+			config.load(fis);
+			fis.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Failed to open configuration!!!!");
+		}    
+		AWS_ACCESS_KEY_ID = config.getProperty("AWS_ACCESS_KEY_ID");
+		AWS_SECRET_KEY = config.getProperty("AWS_SECRET_KEY");
+    }
     public static void main(String[] args) {
         /*
          * Set up the signed requests helper 
