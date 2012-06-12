@@ -131,7 +131,7 @@ public class ItemLookupSample {
 				itemLookupParams.put("ItemId", ids.item(i).getTextContent());
 				requestUrl = helper.sign(itemLookupParams);
 				System.out.println(fetchDescription(requestUrl));
-				extractProductReviews(ids.item(i).getTextContent(),System.out);
+//				extractProductReviews(ids.item(i).getTextContent(),System.out);
 				break;
 			}
 		}
