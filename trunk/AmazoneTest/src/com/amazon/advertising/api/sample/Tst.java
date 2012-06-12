@@ -2,6 +2,7 @@ package com.amazon.advertising.api.sample;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,24 +17,24 @@ public class Tst {
 
 	public static void main(String[] args) throws Exception {
 		String ProducID = "B004LB4SAM";
-		FileWriter fstream = new FileWriter(outPath+ProducID+".txt");
-		BufferedWriter out = new BufferedWriter(fstream);
-		(new Tst()).extractProductReviews(ProducID,out);
-		out.close();
-
+		FileOutputStream outStream = new FileOutputStream(outPath+ProducID+".txt", true); 
+		(new Tst()).extractProductReviews(ProducID,outStream);
+		outStream.close();
 	}
 
 	private void extractProductReviews(String ProducID, OutputStream destanation)
 			throws Exception {
-		Process p = Runtime.getRuntime().exec(
-				new String[] { PERL_CMD, DOWNLOAD_REVIEWS_SCRIPTS, ProducID });
-		pipeOutput(p);
+//		Process p = Runtime.getRuntime().exec(
+//				new String[] { PERL_CMD, DOWNLOAD_REVIEWS_SCRIPTS, ProducID });
+//		pipeOutput(p);
+//		p.waitFor();
 		File outFolder = new File(outPath + ProducID);
+		int i =1;
 		for (String file : outFolder.list()) {
+			System.out.println("At file:"+ i++ +" out of:"+outFolder.list().length);
 			Process p2 = Runtime.getRuntime().exec(
 					new String[] { PERL_CMD, EXTRACT_REVIEWS_SCRIPTS,
 							outFolder.getPath() + "/" + file });
-			pipeOutput(p2);
 			pipe(p2.getInputStream(), destanation);
 		}
 	}
