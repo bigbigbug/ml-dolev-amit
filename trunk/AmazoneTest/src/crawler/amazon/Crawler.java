@@ -19,13 +19,12 @@
  *
  */
 
-package com.amazon.advertising.api.sample;
+package crawler.amazon;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -44,7 +43,7 @@ import org.w3c.dom.NodeList;
  * See the README.html that came with this sample for instructions on
  * configuring and running the sample.
  */
-public class ItemLookupSample {
+public class Crawler {
 
 	/*
 	 * Your AWS Access Key ID, as taken from the AWS Your Account page.
@@ -68,10 +67,8 @@ public class ItemLookupSample {
 
 	private static final Properties config = new Properties();
 	private static final String CONFIG_FILE_LOCATION = "../AMAZONEID.txt";
-	private static final String PERL_CMD = "C:/strawberry/perl/bin/perl.exe";
-	private static final String DOWNLOAD_REVIEWS_SCRIPTS = "./src/scripts/perl/downloadAmazonReviews.pl";
-	private static final String EXTRACT_REVIEWS_SCRIPTS = "./src/scripts/perl/extractAmazonReviews.pl";
-	private static final String outPath = "./amazonreviews/";
+	private static final String PERL_CMD;
+	private static final String OUT_FOLDER = "./data/"; // TODO duplicate
 
 	static {
 		File propsFile = new File(CONFIG_FILE_LOCATION);
@@ -86,6 +83,7 @@ public class ItemLookupSample {
 		}
 		AWS_ACCESS_KEY_ID = config.getProperty("AWS_ACCESS_KEY_ID");
 		AWS_SECRET_KEY = config.getProperty("AWS_SECRET_KEY");
+		PERL_CMD = config.getProperty("PERL_CMD");
 	}
 
 	public static void main(String[] args) {
@@ -98,8 +96,40 @@ public class ItemLookupSample {
 			return;
 		}
 
-		// Parameters for searching cameras
-		String requestUrl = null;
+		for (int page = 1; page < 3; page++) { // iterating over pages
+			Map<String, String> searchParams = getSearchParams(page);
+			String requestUrl = helper.sign(searchParams);
+//			System.out.println("Signed search request is \"" + requestUrl + "\"");
+
+			// iterate over all items in page
+			NodeList ids = fetchItemIDs(requestUrl);
+			NodeList titles = fetchTitles(requestUrl);
+			for (int i = 0; i < ids.getLength(); i++) {
+				String itemId = ids.item(i).getTextContent();
+				
+				Map<String, String> itemLookupParams = getItemLookupParams(itemId);
+				requestUrl = helper.sign(itemLookupParams);
+				
+				File dir = new File(OUT_FOLDER);
+				if (!dir.isDirectory()) dir.mkdirs();
+				File descriptionFile = new File(dir,itemId + "_desc.txt");
+				if (descriptionFile.exists()) descriptionFile.delete();
+				try {
+					descriptionFile.createNewFile();
+					BufferedWriter bw = new BufferedWriter(new FileWriter(descriptionFile));
+					bw.write(titles.item(i).getTextContent() + "\n");
+					bw.write(fetchDescription(requestUrl) + "\n");
+					bw.close();
+					new ReviewExtractor(itemId, PERL_CMD);// handles reviews
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
+	}
+
+	private static Map<String, String> getSearchParams(int page) {
 		Map<String, String> searchParams = new HashMap<String, String>();
 		searchParams.put("Service", "AWSECommerceService");
 		searchParams.put("Version", "2011-08-01");
@@ -109,32 +139,19 @@ public class ItemLookupSample {
 		searchParams.put("BrowseNode", "502394"); // narrows the search to
 													// actual cameras
 		searchParams.put("AssociateTag", "YourAssociateTagHere");
+		searchParams.put("ItemPage", Integer.toString(page));
+		return searchParams;
+	}
 
+	private static Map<String, String> getItemLookupParams(String itemId) {
 		Map<String, String> itemLookupParams = new HashMap<String, String>();
 		itemLookupParams.put("Service", "AWSECommerceService");
 		itemLookupParams.put("Version", "2011-08-01");
 		itemLookupParams.put("Operation", "ItemLookup");
 		itemLookupParams.put("ResponseGroup", "EditorialReview");
 		itemLookupParams.put("AssociateTag", "YourAssociateTagHere");
-
-		for (int page = 1; page < 3; page++) { // iterating over pages
-			searchParams.put("ItemPage", Integer.toString(page));
-			requestUrl = helper.sign(searchParams);
-//			System.out.println("Signed search request is \"" + requestUrl + "\"");
-
-			// iterate over all items in page
-			NodeList ids = fetchItemIDs(requestUrl);
-			NodeList titles = fetchTitles(requestUrl);
-			for (int i = 0; i < ids.getLength(); i++) {
-				System.out.println(ids.item(i).getTextContent());
-				System.out.println(titles.item(i).getTextContent());
-				itemLookupParams.put("ItemId", ids.item(i).getTextContent());
-				requestUrl = helper.sign(itemLookupParams);
-				System.out.println(fetchDescription(requestUrl));
-//				extractProductReviews(ids.item(i).getTextContent(),System.out);
-				break;
-			}
-		}
+		itemLookupParams.put("ItemId", itemId);
+		return itemLookupParams;
 	}
 
 	private static String fetchDescription(String requestUrl) {
@@ -177,38 +194,4 @@ public class ItemLookupSample {
 		return ids;
 	}
 	
-	private static void extractProductReviews(String ProducID, OutputStream destanation)
-			throws Exception {
-		Process p = Runtime.getRuntime().exec(
-				new String[] { PERL_CMD, DOWNLOAD_REVIEWS_SCRIPTS, ProducID });
-		pipeOutput(p);
-		p.waitFor();
-		File outFolder = new File(outPath + ProducID);
-		for (String file : outFolder.list()) {
-			Process p2 = Runtime.getRuntime().exec(
-					new String[] { PERL_CMD, EXTRACT_REVIEWS_SCRIPTS,
-							outFolder.getPath() + "/" + file });
-			pipe(p2.getInputStream(), destanation);
-		}
-	}
-
-	private static void pipeOutput(Process process) {
-		pipe(process.getErrorStream(), System.err);
-		pipe(process.getInputStream(), System.out);
-	}
-
-	private static void pipe(final InputStream src, final OutputStream dest) {
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					byte[] buffer = new byte[1024];
-					for (int n = 0; n != -1; n = src.read(buffer)) {
-						dest.write(buffer, 0, n);
-					}
-				} catch (IOException e) { // just exit
-				}
-			}
-		}).start();
-	}
-
 }

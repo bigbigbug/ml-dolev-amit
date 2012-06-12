@@ -19,7 +19,7 @@
  *
  */
 
-package com.amazon.advertising.api.sample;
+package crawler.amazon;
 
 import java.io.UnsupportedEncodingException;
 
