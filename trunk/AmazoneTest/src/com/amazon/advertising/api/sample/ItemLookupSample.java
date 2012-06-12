@@ -23,6 +23,9 @@ package com.amazon.advertising.api.sample;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -65,6 +68,10 @@ public class ItemLookupSample {
 
 	private static final Properties config = new Properties();
 	private static final String CONFIG_FILE_LOCATION = "../AMAZONEID.txt";
+	private static final String PERL_CMD = "C:/strawberry/perl/bin/perl.exe";
+	private static final String DOWNLOAD_REVIEWS_SCRIPTS = "./src/scripts/perl/downloadAmazonReviews.pl";
+	private static final String EXTRACT_REVIEWS_SCRIPTS = "./src/scripts/perl/extractAmazonReviews.pl";
+	private static final String outPath = "./amazonreviews/";
 
 	static {
 		File propsFile = new File(CONFIG_FILE_LOCATION);
@@ -124,6 +131,7 @@ public class ItemLookupSample {
 				itemLookupParams.put("ItemId", ids.item(i).getTextContent());
 				requestUrl = helper.sign(itemLookupParams);
 				System.out.println(fetchDescription(requestUrl));
+				extractProductReviews(ids.item(i).getTextContent(),System.out);
 				break;
 			}
 		}
@@ -167,6 +175,40 @@ public class ItemLookupSample {
 			throw new RuntimeException(e);
 		}
 		return ids;
+	}
+	
+	private static void extractProductReviews(String ProducID, OutputStream destanation)
+			throws Exception {
+		Process p = Runtime.getRuntime().exec(
+				new String[] { PERL_CMD, DOWNLOAD_REVIEWS_SCRIPTS, ProducID });
+		pipeOutput(p);
+		p.waitFor();
+		File outFolder = new File(outPath + ProducID);
+		for (String file : outFolder.list()) {
+			Process p2 = Runtime.getRuntime().exec(
+					new String[] { PERL_CMD, EXTRACT_REVIEWS_SCRIPTS,
+							outFolder.getPath() + "/" + file });
+			pipe(p2.getInputStream(), destanation);
+		}
+	}
+
+	private static void pipeOutput(Process process) {
+		pipe(process.getErrorStream(), System.err);
+		pipe(process.getInputStream(), System.out);
+	}
+
+	private static void pipe(final InputStream src, final OutputStream dest) {
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					byte[] buffer = new byte[1024];
+					for (int n = 0; n != -1; n = src.read(buffer)) {
+						dest.write(buffer, 0, n);
+					}
+				} catch (IOException e) { // just exit
+				}
+			}
+		}).start();
 	}
 
 }
