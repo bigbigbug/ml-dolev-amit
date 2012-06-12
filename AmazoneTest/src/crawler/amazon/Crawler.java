@@ -96,25 +96,34 @@ public class Crawler {
 			return;
 		}
 
-		for (int page = 1; page < 3; page++) { // iterating over pages
+		for (int page = 1; page < 31; page++) { // iterating over pages
 			Map<String, String> searchParams = getSearchParams(page);
 			String requestUrl = helper.sign(searchParams);
-//			System.out.println("Signed search request is \"" + requestUrl + "\"");
+			System.out.println("At search page: " + page );
 
 			// iterate over all items in page
-			NodeList ids = fetchItemIDs(requestUrl);
-			NodeList titles = fetchTitles(requestUrl);
+			NodeList ids = null;
+			NodeList titles = null;
+			try {
+				ids = fetchItemIDs(requestUrl);
+				titles = fetchTitles(requestUrl);
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
 			for (int i = 0; i < ids.getLength(); i++) {
-				String itemId = ids.item(i).getTextContent();
-				
-				Map<String, String> itemLookupParams = getItemLookupParams(itemId);
-				requestUrl = helper.sign(itemLookupParams);
-				
-				File dir = new File(OUT_FOLDER);
-				if (!dir.isDirectory()) dir.mkdirs();
-				File descriptionFile = new File(dir,itemId + "_desc.txt");
-				if (descriptionFile.exists()) descriptionFile.delete();
 				try {
+					String itemId = ids.item(i).getTextContent();
+					System.out.println("At item: " + itemId );
+					
+					Map<String, String> itemLookupParams = getItemLookupParams(itemId);
+					requestUrl = helper.sign(itemLookupParams);
+					
+					File dir = new File(OUT_FOLDER);
+					if (!dir.isDirectory()) dir.mkdirs();
+					File descriptionFile = new File(dir,itemId + "_desc.txt");
+					if (descriptionFile.exists()) continue;
+					if (descriptionFile.exists()) descriptionFile.delete();
 					descriptionFile.createNewFile();
 					BufferedWriter bw = new BufferedWriter(new FileWriter(descriptionFile));
 					bw.write(titles.item(i).getTextContent() + "\n");
@@ -123,8 +132,8 @@ public class Crawler {
 					new ReviewExtractor(itemId, PERL_CMD);// handles reviews
 				} catch (Exception e) {
 					e.printStackTrace();
+					System.out.println("failed id: " + ids.item(i).getTextContent() );
 				}
-				break;
 			}
 		}
 	}
@@ -136,8 +145,7 @@ public class Crawler {
 		searchParams.put("Operation", "ItemSearch");
 		searchParams.put("SearchIndex", "Electronics");
 		searchParams.put("Keywords", "camera");
-		searchParams.put("BrowseNode", "502394"); // narrows the search to
-													// actual cameras
+		searchParams.put("BrowseNode", "502394"); // narrows the search to actual cameras
 		searchParams.put("AssociateTag", "YourAssociateTagHere");
 		searchParams.put("ItemPage", Integer.toString(page));
 		return searchParams;
@@ -154,43 +162,31 @@ public class Crawler {
 		return itemLookupParams;
 	}
 
-	private static String fetchDescription(String requestUrl) {
+	private static String fetchDescription(String requestUrl) throws Exception {
 		String content = null;
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(requestUrl);
-			Node contentNode = doc.getElementsByTagName("Content").item(0);
-			content = contentNode.getTextContent();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(requestUrl);
+		Node contentNode = doc.getElementsByTagName("Content").item(0);
+		content = contentNode.getTextContent();
 		return content;
 	}
 
-	private static NodeList fetchTitles(String requestUrl) {
+	private static NodeList fetchTitles(String requestUrl) throws Exception {
 		NodeList titleNodes = null;
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(requestUrl);
-			titleNodes = doc.getElementsByTagName("Title");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(requestUrl);
+		titleNodes = doc.getElementsByTagName("Title");
 		return titleNodes;
 	}
 
-	private static NodeList fetchItemIDs(String requestUrl) {
+	private static NodeList fetchItemIDs(String requestUrl) throws Exception {
 		NodeList ids = null;
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			Document doc = db.parse(requestUrl);
-			ids = doc.getElementsByTagName("ASIN");
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(requestUrl);
+		ids = doc.getElementsByTagName("ASIN");
 		return ids;
 	}
 	
