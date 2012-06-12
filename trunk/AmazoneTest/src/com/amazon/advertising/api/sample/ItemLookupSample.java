@@ -42,37 +42,33 @@ import org.w3c.dom.NodeList;
  * configuring and running the sample.
  */
 public class ItemLookupSample {
-    /*
-     * Your AWS Access Key ID, as taken from the AWS Your Account page.
-     */
-    private static final String AWS_ACCESS_KEY_ID;
 
-    /*
-     * Your AWS Secret Key corresponding to the above ID, as taken from the AWS
-     * Your Account page.
-     */
-    private static final String AWS_SECRET_KEY;
+	/*
+	 * Your AWS Access Key ID, as taken from the AWS Your Account page.
+	 */
+	private static final String AWS_ACCESS_KEY_ID;
 
-    /*
-     * Use one of the following end-points, according to the region you are
-     * interested in:
-     * 
-     *      US: ecs.amazonaws.com 
-     *      CA: ecs.amazonaws.ca 
-     *      UK: ecs.amazonaws.co.uk 
-     *      DE: ecs.amazonaws.de 
-     *      FR: ecs.amazonaws.fr 
-     *      JP: ecs.amazonaws.jp
-     * 
-     */
-    private static final String ENDPOINT = "ecs.amazonaws.com";
+	/*
+	 * Your AWS Secret Key corresponding to the above ID, as taken from the AWS
+	 * Your Account page.
+	 */
+	private static final String AWS_SECRET_KEY;
 
-    private static final Properties config = new Properties();
-    private static final String CONFIG_FILE_LOCATION = "../AMAZONEID.txt";
-    
-    static {
-    	File propsFile = new File(CONFIG_FILE_LOCATION);
-        FileInputStream fis;
+	/*
+	 * Use one of the following end-points, according to the region you are
+	 * interested in:
+	 * 
+	 * US: ecs.amazonaws.com CA: ecs.amazonaws.ca UK: ecs.amazonaws.co.uk DE:
+	 * ecs.amazonaws.de FR: ecs.amazonaws.fr JP: ecs.amazonaws.jp
+	 */
+	private static final String ENDPOINT = "ecs.amazonaws.com";
+
+	private static final Properties config = new Properties();
+	private static final String CONFIG_FILE_LOCATION = "../AMAZONEID.txt";
+
+	static {
+		File propsFile = new File(CONFIG_FILE_LOCATION);
+		FileInputStream fis;
 		try {
 			fis = new FileInputStream(propsFile);
 			config.load(fis);
@@ -80,97 +76,97 @@ public class ItemLookupSample {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Failed to open configuration!!!!");
-		}    
+		}
 		AWS_ACCESS_KEY_ID = config.getProperty("AWS_ACCESS_KEY_ID");
 		AWS_SECRET_KEY = config.getProperty("AWS_SECRET_KEY");
-    }
-    public static void main(String[] args) {
-        /*
-         * Set up the signed requests helper 
-         */
-        SignedRequestsHelper helper;
-        try {
-            helper = SignedRequestsHelper.getInstance(ENDPOINT, AWS_ACCESS_KEY_ID, AWS_SECRET_KEY);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
-        
-        String requestUrl = null;
-        String title = null;
+	}
 
-        /* The helper can sign requests in two forms - map form and string form */
-        
-        /*
-         * Here is an example in map form, where the request parameters are stored in a map.
-         */
-        System.out.println("Map form example:");
-        Map<String, String> params = new HashMap<String, String>();
-//        params.put("Service", "AWSECommerceService");
-//        params.put("Version", "2009-03-31");
-//        params.put("Operation", "ItemLookup");
-//        params.put("ItemId", ITEM_ID);
-//        params.put("ResponseGroup", "Small");
-        
-        params.put("Service","AWSECommerceService");
-        params.put("Version","2011-08-01");
-		params.put("Operation","ItemSearch");
-		params.put("SearchIndex","Books");
-		params.put("Keywords","harry+potter");
-		params.put("AssociateTag","YourAssociateTagHere");
-
-        requestUrl = helper.sign(params);
-        System.out.println("Signed Request is \"" + requestUrl + "\"");
-
-        title = fetchTitle(requestUrl);
-        System.out.println("Signed Title is \"" + title + "\"");
-        System.out.println();
-
-        NodeList ids = fetchItemIDs(requestUrl);
-        for (int i = 0; i < ids.getLength(); i++) {
-			System.out.println(ids.item(i).getTextContent());
-			params = new HashMap<String, String>();
-	        params.put("Operation", "ItemLookup");
-	        params.put("ItemId", ids.item(i).getTextContent());	        
-	        params.put("Service","AWSECommerceService");
-	        params.put("Version","2011-08-01");
-			params.put("AssociateTag","YourAssociateTagHere");
-			requestUrl = helper.sign(params);
-	        System.out.println("Signed Request is \"" + requestUrl + "\"");
-
-	        title = fetchTitle(requestUrl);
-	        System.out.println("Signed Title is \"" + title + "\"");
+	public static void main(String[] args) {
+		SignedRequestsHelper helper;
+		try {
+			helper = SignedRequestsHelper.getInstance(ENDPOINT,
+					AWS_ACCESS_KEY_ID, AWS_SECRET_KEY);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return;
 		}
-    }
 
-    /*
-     * Utility function to fetch the response from the service and extract the
-     * title from the XML.
-     */
-    private static String fetchTitle(String requestUrl) {
-        String title = null;
-        try {
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(requestUrl);
-            Node titleNode = doc.getElementsByTagName("Title").item(0);
-            title = titleNode.getTextContent();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return title;
-    }
-    private static NodeList fetchItemIDs(String requestUrl) {
-    	NodeList ids = null;
-    	try {
-    		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    		DocumentBuilder db = dbf.newDocumentBuilder();
-    		Document doc = db.parse(requestUrl);
-    		ids = doc.getElementsByTagName("ASIN");
-    	} catch (Exception e) {
-    		throw new RuntimeException(e);
-    	}
-    	return ids;
-    }
+		// Parameters for searching cameras
+		String requestUrl = null;
+		Map<String, String> searchParams = new HashMap<String, String>();
+		searchParams.put("Service", "AWSECommerceService");
+		searchParams.put("Version", "2011-08-01");
+		searchParams.put("Operation", "ItemSearch");
+		searchParams.put("SearchIndex", "Electronics");
+		searchParams.put("Keywords", "camera");
+		searchParams.put("BrowseNode", "502394"); // narrows the search to
+													// actual cameras
+		searchParams.put("AssociateTag", "YourAssociateTagHere");
+
+		Map<String, String> itemLookupParams = new HashMap<String, String>();
+		itemLookupParams.put("Service", "AWSECommerceService");
+		itemLookupParams.put("Version", "2011-08-01");
+		itemLookupParams.put("Operation", "ItemLookup");
+		itemLookupParams.put("ResponseGroup", "EditorialReview");
+		itemLookupParams.put("AssociateTag", "YourAssociateTagHere");
+
+		for (int page = 1; page < 3; page++) { // iterating over pages
+			searchParams.put("ItemPage", Integer.toString(page));
+			requestUrl = helper.sign(searchParams);
+//			System.out.println("Signed search request is \"" + requestUrl + "\"");
+
+			// iterate over all items in page
+			NodeList ids = fetchItemIDs(requestUrl);
+			NodeList titles = fetchTitles(requestUrl);
+			for (int i = 0; i < ids.getLength(); i++) {
+				System.out.println(ids.item(i).getTextContent());
+				System.out.println(titles.item(i).getTextContent());
+				itemLookupParams.put("ItemId", ids.item(i).getTextContent());
+				requestUrl = helper.sign(itemLookupParams);
+				System.out.println(fetchDescription(requestUrl));
+				break;
+			}
+		}
+	}
+
+	private static String fetchDescription(String requestUrl) {
+		String content = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.parse(requestUrl);
+			Node contentNode = doc.getElementsByTagName("Content").item(0);
+			content = contentNode.getTextContent();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return content;
+	}
+
+	private static NodeList fetchTitles(String requestUrl) {
+		NodeList titleNodes = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.parse(requestUrl);
+			titleNodes = doc.getElementsByTagName("Title");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return titleNodes;
+	}
+
+	private static NodeList fetchItemIDs(String requestUrl) {
+		NodeList ids = null;
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			Document doc = db.parse(requestUrl);
+			ids = doc.getElementsByTagName("ASIN");
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return ids;
+	}
 
 }
