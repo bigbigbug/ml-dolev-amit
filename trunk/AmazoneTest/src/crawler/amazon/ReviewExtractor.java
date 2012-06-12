@@ -35,7 +35,6 @@ public class ReviewExtractor {
 	private static final int TITLE_IDX  = 6;
 	
 	private void cannonize(File productFile,String productId) throws IOException {
-		System.out.println(productFile);
 		FileReader fr = new FileReader(productFile);
 		BufferedReader br = new BufferedReader(fr);
 		File dir = new File(OUT_FOLDER);
@@ -46,7 +45,6 @@ public class ReviewExtractor {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(reviewsFile));
 		String line = null;
 		while (( line = br.readLine()) != null) {
-			System.out.println("reading");
 			String[] arr = line.split("\",\"",-1);
 			if (arr.length < 8) { 
 				System.err.println("the length is only " + arr.length);
