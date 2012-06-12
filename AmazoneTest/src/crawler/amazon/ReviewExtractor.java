@@ -1,4 +1,4 @@
-package com.amazon.advertising.api.sample;
+package crawler.amazon;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,25 +9,24 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 
-public class Tst {
-	private static final String PERL_CMD = "C:/Programming/pearl/perl/bin/perl.exe"; //TODO: add to system property
+public class ReviewExtractor {
+	private String perlCmd;
+	
 	private static final String DOWNLOAD_REVIEWS_SCRIPTS = "./src/scripts/perl/downloadAmazonReviews.pl";
 	private static final String EXTRACT_REVIEWS_SCRIPTS = "./src/scripts/perl/extractAmazonReviews.pl";
 	private static final String OUT_FOLDER = "./data/";
 	private static final String TEMP_FOLDER =  "./amazonreviews/";
 
-	public static void main(String[] args) throws Exception {
-		String ProducID = "B004LB4SAM";
+	public ReviewExtractor(String ProducID, String perlCmd) throws Exception {
+		this.perlCmd = perlCmd;
 		File dir = new File(TEMP_FOLDER);
 		if (!dir.isDirectory()) dir.mkdirs();
 		File productFile = new File(dir,ProducID+".txt");
 		if (!productFile.exists()) productFile.createNewFile();
 		FileOutputStream outStream = new FileOutputStream(productFile, true); //TODO: shoule remain as append? 
-		Tst tst = new Tst();
-		tst.extractProductReviews(ProducID,outStream);
-		tst.cannonize(productFile,ProducID);
+		extractProductReviews(ProducID,outStream);
+		cannonize(productFile,ProducID);
 		
 	}
 	private static final int DATE_IDX  = 1;
@@ -65,7 +64,7 @@ public class Tst {
 	private void extractProductReviews(String ProducID, OutputStream destination)
 			throws Exception {
 		Process p = Runtime.getRuntime().exec(
-				new String[] { PERL_CMD, DOWNLOAD_REVIEWS_SCRIPTS, ProducID });
+				new String[] { perlCmd, DOWNLOAD_REVIEWS_SCRIPTS, ProducID });
 		pipeOutput(p);
 		p.waitFor();
 		File outFolder = new File(TEMP_FOLDER + ProducID);
@@ -73,7 +72,7 @@ public class Tst {
 		for (String file : outFolder.list()) {
 			System.out.println("At file:"+ i++ +" out of:"+outFolder.list().length);
 			Process p2 = Runtime.getRuntime().exec(
-					new String[] { PERL_CMD, EXTRACT_REVIEWS_SCRIPTS,
+					new String[] { perlCmd, EXTRACT_REVIEWS_SCRIPTS,
 							outFolder.getPath() + "/" + file });
 			pipe(p2.getInputStream(), destination);
 			p2.waitFor();
