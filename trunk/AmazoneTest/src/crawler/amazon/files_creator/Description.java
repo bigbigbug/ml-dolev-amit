@@ -1,4 +1,4 @@
-package data.files.creator;
+package crawler.amazon.files_creator;
 
 import java.io.BufferedReader;
 import java.io.File;

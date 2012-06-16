@@ -1,4 +1,4 @@
-package data.files.creator;
+package crawler.amazon.files_creator;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,7 +19,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 
-import data.files.creator.Review.Classification;
+import crawler.amazon.files_creator.Review.Classification;
+
 
 public class DataFilesCreator {
 
