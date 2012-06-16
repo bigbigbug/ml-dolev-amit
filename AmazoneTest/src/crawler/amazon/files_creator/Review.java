@@ -1,4 +1,4 @@
-package data.files.creator;
+package crawler.amazon.files_creator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -51,9 +51,9 @@ public class Review {
 		return review.equals(((Review)obj).review);
 	}
 	
-	private Map<String, Integer> createHistogram(String string,Set<String> stemmedWords,String prefix) {
+	private Map<String, Integer> createHistogram(String string,Set<String> stopWords,String prefix) {
 		Map<String,Integer> histogram = new HashMap<String, Integer>();
-		for (String str : Stemmer.getTerms(string, stemmedWords)) {
+		for (String str : Stemmer.getTerms(string, stopWords)) {
 			String s = prefix + str;
 			Integer x = histogram.get(s);
 			histogram.put(s,(x == null? 1 : x + 1));
