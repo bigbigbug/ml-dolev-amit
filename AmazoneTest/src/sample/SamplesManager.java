@@ -20,6 +20,8 @@ public class SamplesManager {
 	private static final int DATA_COUNT_IDX = 2;
 	private static final String CLASSIFICATION_FILE_NAME = "train.label";
 	private static final String DATA_FILE_NAME = "train.data";
+	private static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
+	private static final String TEST_DATA_FILE_NAME = "test.data";
 	private static SamplesManager INSTANCE;
 	private Map<Integer,Integer> idfMap;
 	private SamplesManager() {
@@ -35,7 +37,8 @@ public class SamplesManager {
 	}
 	/**
 	 * parses a train data, from the default dir and file names
-	 * @return
+	 * It also has side affect of modifying the idf list according to the data.
+	 * @return a samples list
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
@@ -45,10 +48,11 @@ public class SamplesManager {
 	}
 	/**
 	 * parses a train data from the denoted dir and file names.
+	 * It also has side affect of modifying the idf list according to the data.
 	 * @param dir
 	 * @param dataFileName
 	 * @param classificationFileName
-	 * @return
+	 * @return a samples list 
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
@@ -63,6 +67,38 @@ public class SamplesManager {
 
 		return samples;
 	}
+	
+	/**
+	 * creates a list of test samples. The parser does not add the new attributes to the idf counter.
+	 * It parses the data from the default files and dir. 
+	 * @return a samples list
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public List<Sample> parseTestData() throws FileNotFoundException, IOException {
+		File dir = new File(DATA_DIR);
+		return parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME);
+	}
+	
+	/**
+	 * creates a list of test samples. The parser does not add the new attributes to the idf counter. 
+	 * @param dir
+	 * @param dataFileName
+	 * @param classificationFileName
+	 * @return a samples list
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public List<Sample> parseTestData(File dir, String dataFileName, String classificationFileName) throws FileNotFoundException, IOException { 
+		if (!dir.isDirectory()) throw new FileNotFoundException("The data dir was not found");
+		File dataFile = new File(dir,dataFileName);
+		if (!dataFile.exists()) throw new FileNotFoundException("The data file was not found");
+		File labelFile = new File(dir,classificationFileName);
+		if (!labelFile.exists()) throw new FileNotFoundException("The classificatrion file was not found");
+		List<Sample> samples = createSamples(dataFile,labelFile);
+		return samples;
+		
+	}
 	/**
 	 * Given a data file and a label file, it gets all samples from these files, including calculating tf-idf 
 	 * @param dataFile The file representiong the data (.data file)
@@ -70,7 +106,7 @@ public class SamplesManager {
 	 * @return a list of samples parsed by the method
 	 * @throws IOException
 	 */
-	public List<Sample> createSamples(File dataFile, File labelFile) throws IOException {
+	private List<Sample> createSamples(File dataFile, File labelFile) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(dataFile));
 		Scanner sc = new Scanner(labelFile);
 		String line;
@@ -118,17 +154,17 @@ public class SamplesManager {
  * @param docId
  * @return the idf value of this document
  */
-	public double idfValue(int docId) {
+	private double idfValue(int docId) {
 		double d  = idfMap.size();
 		Integer count = idfMap.get(docId);
 		if (count == 0) return -1;
 		d /= count;
 		return Math.log(d);
 	}
-	
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();
 		System.out.println(l.size());
 	}
+	
 }
