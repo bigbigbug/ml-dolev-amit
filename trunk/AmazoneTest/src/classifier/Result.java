@@ -3,14 +3,19 @@ package classifier;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class ClassificationResult {
+public class Result {
 	
-	public final Double[] classes;
 	public final double[][] confMat;
 	public final int numSamples;
 	public final int correctSamples;
+	
+	public Result(double[][] confMat, double correctSamples, double numSamples) {
+		this.confMat = confMat;
+		this.correctSamples = new Double(correctSamples).intValue();
+		this.numSamples = new Double(numSamples).intValue();
+	}
 
-	public ClassificationResult(double[] expected, double[] predictions) {
+	public Result(double[] expected, double[] predictions) {
 		if (expected.length != predictions.length) throw new RuntimeException("Num of expected result does not match num of actual results");
 	
 		int correctSamplesCounter = 0;
@@ -21,7 +26,6 @@ public class ClassificationResult {
 			classes.add(predictions[i]);
 		}
 		int numClasses = classes.size();
-		this.classes = classes.toArray(new Double[numClasses]);
 		confMat = new double[numClasses][numClasses];
 		for (int i = 0; i < numClasses; i++) {
 			for (int j = 0; j < numClasses; j++) {
@@ -39,6 +43,10 @@ public class ClassificationResult {
 	
 	public double accuracy() {
 		return correctSamples/numSamples;
+	}
+	
+	public double[][] confusionMat() {
+		return confMat;
 	}
 
 }
