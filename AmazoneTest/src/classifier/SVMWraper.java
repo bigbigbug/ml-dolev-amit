@@ -38,25 +38,25 @@ public class SVMWraper implements Classifier {
 	 * @see classifier.classifierAlg#crossValidation(int)
 	 */
 	@Override
-	public ClassificationResult crossValidation(int folds) {
+	public Result crossValidation(int folds) {
 		// optimize params
 		double[] predictions = new double[mergedProb.l];
 		svm.svm_cross_validation(mergedProb, param, folds, predictions);
-		return new ClassificationResult(mergedProb.y, predictions);
+		return new Result(mergedProb.y, predictions);
 	}
 
 	/* (non-Javadoc)
 	 * @see classifier.classifierAlg#trainTest()
 	 */
 	@Override
-	public ClassificationResult trainTest() {
+	public Result trainTest() {
 		// optimize params
 		double[] predictions = new double[testProb.l];
 		svm_model model = svm.svm_train(trainProb, param);
 		for (int i = 0; i < testProb.l; i++) {
 			predictions[i] = svm.svm_predict(model, testProb.x[i]);
 		}
-		return new ClassificationResult(testProb.y, predictions);
+		return new Result(testProb.y, predictions);
 	}
 
 	private svm_problem createSVMProb(List<Sample> samples) {

@@ -161,6 +161,7 @@ public class SamplesManager {
 		d /= count;
 		return Math.log(d);
 	}
+	public int numAttributes() { throw new UnsupportedOperationException("not implemented yet");}  
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();
