@@ -10,13 +10,13 @@ import weka.core.Instances;
 public class WekaWraper implements Classifier {
 	
 	public WekaWraper(List<Sample> train, List<Sample> test) {
-		Sample
-		SortedSet attributes = new TreeSet<String>()
+//		Sample
+//		SortedSet attributes = new TreeSet<String>();
 		
 		
-		Instances train = new Instances("trainData", attInfo, Integer.MAX_VALUE);
-		Instances test;
-		
+//		Instances train = new Instances("trainData", attInfo, Integer.MAX_VALUE);
+//		Instances test;
+//		
 		// TODO Auto-generated constructor stub
 	}
 
