@@ -15,11 +15,9 @@ public class SVMWraper implements Classifier {
 
 	private svm_parameter param = defaultParams();
 
-	svm_problem trainProb;
-	svm_problem testProb;
-	svm_problem mergedProb;
-
-	// svm_problem prob = new svm_problem();
+	private final svm_problem trainProb;
+	private final svm_problem testProb;
+	private final svm_problem mergedProb;
 
 	public SVMWraper(List<Sample> train, List<Sample> test) {
 
