@@ -1,16 +1,45 @@
 package classifier;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import sample.Sample;
+import sample.SamplesManager;
 
 public class ClassifierFactory {
 	
 	public enum ClassifierType {
 		SVM_LINEAR, SVM_HYPERBOLIC, NAIVE_BAYSE
 	}
+	public enum FeatureSelector {
+		NONE, SVM, PCA
+	}
 	
-	public static Classifier getClassifier(ClassifierType type, List<Sample> train, List<Sample> test) {
+	private static final String CLASSIFICATION_FILE_NAME = "train.label";
+	private static final String DATA_FILE_NAME = "train.data";
+	private static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
+	private static final String TEST_DATA_FILE_NAME = "test.data";
+	/**
+	 * Returns an instance of a {@link Classifier}.
+	 * @param type: type of classifier used
+	 * @param samplesManager: The SamplesManager used to extract data and train
+	 * @param dir: The dir where the files are located. Assuming standard file names, 
+	 * as found in the static variables in this class, and as defined in the 
+	 * assignment description 
+	 * @param featuresSelector:  The type of {@link FeatureSelector} to use
+	 * @return
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	public static Classifier getClassifier(ClassifierType type, SamplesManager samplesManager,File dir
+			, FeatureSelector featuresSelector ) 
+					throws IOException, FileNotFoundException {
+		
+		List<Sample> train = samplesManager.parseTestData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,featuresSelector);
+		List<Sample> test = samplesManager.parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,featuresSelector);
+		
 		Classifier retVal;
 		switch (type) {
 	        case SVM_LINEAR:

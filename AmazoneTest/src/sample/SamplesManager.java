@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import classifier.ClassifierFactory.FeatureSelector;
+
 import crawler.amazon.files_creator.DataFilesCreator;
 
 public class SamplesManager {
@@ -44,7 +46,7 @@ public class SamplesManager {
 	 */
 	public List<Sample> parseTrainData() throws FileNotFoundException, IOException {
 		File dir = new File(DATA_DIR);
-		return parseTrainData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME);
+		return parseTrainData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,FeatureSelector.NONE);
 	}
 	/**
 	 * parses a train data from the denoted dir and file names.
@@ -56,7 +58,7 @@ public class SamplesManager {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public List<Sample> parseTrainData(File dir, String dataFileName, String classificationFileName) throws FileNotFoundException, IOException {
+	public List<Sample> parseTrainData(File dir, String dataFileName, String classificationFileName,FeatureSelector featureSelector) throws FileNotFoundException, IOException {
 		if (!dir.isDirectory()) throw new FileNotFoundException("The data dir was not found");
 		File dataFile = new File(dir,dataFileName);
 		if (!dataFile.exists()) throw new FileNotFoundException("The data file was not found");
@@ -77,7 +79,7 @@ public class SamplesManager {
 	 */
 	public List<Sample> parseTestData() throws FileNotFoundException, IOException {
 		File dir = new File(DATA_DIR);
-		return parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME);
+		return parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,FeatureSelector.NONE);
 	}
 	
 	/**
@@ -89,7 +91,7 @@ public class SamplesManager {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public List<Sample> parseTestData(File dir, String dataFileName, String classificationFileName) throws FileNotFoundException, IOException { 
+	public List<Sample> parseTestData(File dir, String dataFileName, String classificationFileName, FeatureSelector featureSelector) throws FileNotFoundException, IOException { 
 		if (!dir.isDirectory()) throw new FileNotFoundException("The data dir was not found");
 		File dataFile = new File(dir,dataFileName);
 		if (!dataFile.exists()) throw new FileNotFoundException("The data file was not found");
