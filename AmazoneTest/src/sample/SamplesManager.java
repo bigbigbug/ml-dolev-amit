@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import classifier.ClassifierFactory.FeatureSelector;
 
 import crawler.amazon.files_creator.DataFilesCreator;
+import feature.selection.FeatureSelector;
 
 public class SamplesManager {
 	public static final String DATA_DIR = DataFilesCreator.RESULT_DIR_NAME;
@@ -79,7 +79,7 @@ public class SamplesManager {
 	 */
 	public List<Sample> parseTestData() throws FileNotFoundException, IOException {
 		File dir = new File(DATA_DIR);
-		return parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,FeatureSelector.NONE);
+		return parseTestData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,FeatureSelector.NONE);
 	}
 	
 	/**
