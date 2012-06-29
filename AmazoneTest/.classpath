@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="lib/lucene-core-3.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-3.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/libsvm.jar"/>
+	<classpathentry kind="lib" path="lib/weka.jar" sourcepath="C:/Program Files/Weka-3-7/weka-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
