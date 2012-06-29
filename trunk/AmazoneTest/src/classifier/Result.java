@@ -1,5 +1,6 @@
 package classifier;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -35,18 +36,32 @@ public class Result {
 		for (int i = 0; i < predictions.length; i++) {
 			int exp = (new Double(expected[i])).intValue();
 			int pred = (new Double(predictions[i])).intValue();
-			confMat[exp][pred]++; 
+			confMat[exp-1][pred-1]++; 
 			if (exp == pred) correctSamplesCounter++;
 		}
 		correctSamples = correctSamplesCounter;
 	}
 	
 	public double accuracy() {
-		return correctSamples/numSamples;
+		return (double)correctSamples/(double)numSamples;
 	}
 	
 	public double[][] confusionMat() {
 		return confMat;
+	}
+	
+	private String classeLabels[] = {"Against","Natural","Pro"};
+	public String confMatString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("\t" + Arrays.toString(classeLabels)+"\n");
+        for (int i=0; i<confMat.length; i++) {
+        		sb.append(classeLabels[i]);
+                for (int j=0; j<confMat[i].length; j++) {
+                	sb.append("\t" + confMat[i][j]);
+                }
+                sb.append("\n");
+        }
+        return sb.toString();
 	}
 
 }
