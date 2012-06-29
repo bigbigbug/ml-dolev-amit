@@ -159,7 +159,7 @@ public class SamplesManager {
 	private double idfValue(int docId) {
 		double d  = idfMap.size();
 		Integer count = idfMap.get(docId);
-		if (count == 0) return -1;
+		if (count == null || count == 0) return -1;
 		d /= count;
 		return Math.log(d);
 	}
