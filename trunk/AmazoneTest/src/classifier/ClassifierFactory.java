@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
+import feature.selection.FeatureSelector;
+
 import sample.Sample;
 import sample.SamplesManager;
 
@@ -12,9 +14,6 @@ public class ClassifierFactory {
 	
 	public enum ClassifierType {
 		SVM_LINEAR, SVM_HYPERBOLIC, NAIVE_BAYSE
-	}
-	public enum FeatureSelector {
-		NONE, SVM, PCA
 	}
 	
 	private static final String CLASSIFICATION_FILE_NAME = "train.label";
