@@ -34,6 +34,7 @@ public class DataFilesCreator {
 	public static final double PER_PRO = 0.3;
 	public static final double PER_AGAINST = 0.3;
 	public static final double PER_NEUTRAL = 0.2;
+	private static final double PERCENT_TEST = 0.1;
 	
 	private List<Review> against;
 	private List<Review> neutrals;
@@ -74,7 +75,7 @@ public class DataFilesCreator {
 	}
 	private void writeFiles(List<Review> reviews,Random r,File outDir) throws IOException  {
 		Collections.shuffle(reviews,r);
-		int numTestFiles = NUM_REVIEWS/10;
+		int numTestFiles = (int)(((double)NUM_REVIEWS) * PERCENT_TEST);
 		createFiles(reviews.subList(0,numTestFiles),"test",outDir);
 		createFiles(reviews.subList(numTestFiles,reviews.size()),"train",outDir);
 	}
