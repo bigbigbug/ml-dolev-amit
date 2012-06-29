@@ -16,6 +16,8 @@ import crawler.amazon.files_creator.DataFilesCreator;
 import feature.selection.FeatureSelector;
 
 public class SamplesManager {
+	
+	private FeatureSelector featureSelector;
 	public static final String DATA_DIR = DataFilesCreator.RESULT_DIR_NAME;
 	private static final int DATA_DOC_IDX = 0;
 	private static final int DATA_WORD_IDX = 1;
@@ -66,32 +68,37 @@ public class SamplesManager {
 		if (!labelFile.exists()) throw new FileNotFoundException("The classificatrion file was not found");
 		populateHistogram(dataFile);
 		List<Sample> samples = createSamples(dataFile,labelFile);
-		
+		this.featureSelector = featureSelector;
 		return featureSelector.selectFeatresFromTrain(samples);
 	}
 	
 	/**
 	 * creates a list of test samples. The parser does not add the new attributes to the idf counter.
 	 * It parses the data from the default files and dir. 
+	 * It must be called after parseTrainDate()
 	 * @return a samples list
 	 * @throws FileNotFoundException
 	 * @throws IOException
+	 * @throws IllegalStateException if parseTestData() was called before parseTrainData()
 	 */
 	public List<Sample> parseTestData() throws FileNotFoundException, IOException {
 		File dir = new File(DATA_DIR);
-		return parseTestData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,FeatureSelector.NONE);
+		return parseTestData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME);
 	}
 	
 	/**
-	 * creates a list of test samples. The parser does not add the new attributes to the idf counter. 
+	 * creates a list of test samples. The parser does not add the new attributes to the idf counter.
+	 * It must be called after parseTrainDate() 
 	 * @param dir
 	 * @param dataFileName
 	 * @param classificationFileName
 	 * @return a samples list
 	 * @throws FileNotFoundException
 	 * @throws IOException
+	 * @throws IllegalStateException if parseTestData() was called before parseTrainData()
 	 */
-	public List<Sample> parseTestData(File dir, String dataFileName, String classificationFileName, FeatureSelector featureSelector) throws FileNotFoundException, IOException { 
+	public List<Sample> parseTestData(File dir, String dataFileName, String classificationFileName) throws FileNotFoundException, IOException, IllegalStateException  {
+		if (featureSelector == null) throw new IllegalStateException("parseTrainData() must be called befoe parseTestData()");
 		if (!dir.isDirectory()) throw new FileNotFoundException("The data dir was not found");
 		File dataFile = new File(dir,dataFileName);
 		if (!dataFile.exists()) throw new FileNotFoundException("The data file was not found");
@@ -163,7 +170,16 @@ public class SamplesManager {
 		d /= count;
 		return Math.log(d);
 	}
-	public int numAttributes() { throw new UnsupportedOperationException("not implemented yet");}  
+	/**
+	 * 
+	 * @return
+	 * @throws IllegalStateException if parseTrainData() was not already invoked
+	 */
+	public int numAttributes() { 
+		if (featureSelector == null) throw new IllegalStateException("Must invoke parseTrainData() first");
+		return featureSelector.numberOfFeatures();
+	}
+	
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();

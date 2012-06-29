@@ -26,5 +26,11 @@ public interface FeatureSelector {
 	 * @throws IllegalStateException - if it is invoked before selctFeaturesFromTrain() was invoked
 	 */
 	List<Sample> filterFeaturesFromTest(List<Sample> testSet) throws IllegalStateException;
+	/**
+	 * gets the number of features selected by this selector
+	 * @return the number of features selected by this feature selector
+	 * @throws IllegalStateException - if it is invoked before selctFeaturesFromTrain() was invoked
+	 */
+	int numberOfFeatures(); 
 	
 }
