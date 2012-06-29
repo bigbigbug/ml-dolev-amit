@@ -4,7 +4,11 @@ import java.util.List;
 
 import sample.Sample;
 
-
+/**
+ * interface for the feature selector
+ * @author AmitGross
+ *
+ */
 public interface FeatureSelector {
 	
 	public static FeatureSelector NONE = new NoFilterSelector();

@@ -1,7 +1,9 @@
 package sample;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class Sample {
 	/**
@@ -17,5 +19,14 @@ public class Sample {
 		this.classification = classification;
 		this.attributes = attributes;
 		Collections.sort(attributes);
+	}
+	
+	public Sample(Sample original, Set<Attribute> useOnlyThisAttributes) { 
+		attributes = new ArrayList<Attribute>();
+		classification = original.classification;
+		for (Attribute att : original.attributes) {
+			if (useOnlyThisAttributes.contains(att)) 
+				attributes.add(att);
+		}
 	}
 }
