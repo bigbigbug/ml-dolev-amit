@@ -66,8 +66,8 @@ public class SamplesManager {
 		if (!labelFile.exists()) throw new FileNotFoundException("The classificatrion file was not found");
 		populateHistogram(dataFile);
 		List<Sample> samples = createSamples(dataFile,labelFile);
-
-		return samples;
+		
+		return featureSelector.selectFeatresFromTrain(samples);
 	}
 	
 	/**
@@ -98,7 +98,7 @@ public class SamplesManager {
 		File labelFile = new File(dir,classificationFileName);
 		if (!labelFile.exists()) throw new FileNotFoundException("The classificatrion file was not found");
 		List<Sample> samples = createSamples(dataFile,labelFile);
-		return samples;
+		return featureSelector.filterFeaturesFromTest(samples);
 		
 	}
 	/**
