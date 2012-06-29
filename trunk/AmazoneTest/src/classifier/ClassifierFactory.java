@@ -39,7 +39,7 @@ public class ClassifierFactory {
 		List<Sample> train = samplesManager.parseTestData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,featuresSelector);
 		List<Sample> test = samplesManager.parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,featuresSelector);
 		
-		Classifier retVal;
+		Classifier retVal = null;
 		switch (type) {
 	        case SVM_LINEAR:
 	        	retVal = new SVMWraper(train, test);
@@ -52,13 +52,13 @@ public class ClassifierFactory {
 	            break;
 	                     
 	        case NAIVE_BAYSE:
-	            System.out.println("Weekends are best.");
+	            retVal = new WekaWraper(train, test);
 	            break;
 	                    
 	        default:
 	            throw new RuntimeException("this classifier does not exists");
 		}
-		return null;
+		return retVal;
 	}
 
 }
