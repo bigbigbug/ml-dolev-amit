@@ -5,12 +5,13 @@ import java.io.IOException;
 
 import sample.SamplesManager;
 import classifier.ClassifierFactory.ClassifierType;
+import feature.selection.FeatureSelector;
 
 public class TestClassifiers {
 	
 	public static void main(String[] args) throws IOException {
 		Classifier cls = ClassifierFactory.getClassifier(ClassifierType.SVM_LINEAR, 
-				SamplesManager.getInstance(), new File(SamplesManager.DATA_DIR), null);
+				SamplesManager.getInstance(), new File(SamplesManager.DATA_DIR), FeatureSelector.NONE);
 		Result res = cls.crossValidation(10);
 		System.out.println("Final Results");
 		System.out.println("Num Samples: " + res.numSamples);

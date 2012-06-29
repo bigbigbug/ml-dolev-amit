@@ -36,8 +36,8 @@ public class ClassifierFactory {
 			, FeatureSelector featuresSelector ) 
 					throws IOException, FileNotFoundException {
 		
-		List<Sample> train = samplesManager.parseTestData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,featuresSelector);
-		List<Sample> test = samplesManager.parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,featuresSelector);
+		List<Sample> train = samplesManager.parseTrainData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME,featuresSelector);
+		List<Sample> test = samplesManager.parseTestData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME);
 		
 		Classifier retVal = null;
 		switch (type) {
