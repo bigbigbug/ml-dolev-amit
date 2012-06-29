@@ -17,7 +17,6 @@ public class SVMWraper implements Classifier {
 
 	private final svm_problem trainProb;
 	private final svm_problem testProb;
-	private final svm_problem mergedProb;
 
 	public SVMWraper(List<Sample> train, List<Sample> test) {
 
@@ -27,11 +26,6 @@ public class SVMWraper implements Classifier {
 		// build problem
 		trainProb = createSVMProb(train);
 		testProb = createSVMProb(test);
-		// TODO not very efficient can optimize by using same elements...
-		List<Sample> merged = new LinkedList<Sample>(train);
-		merged.addAll(test);
-		mergedProb = createSVMProb(merged);
-
 	}
 
 	/* (non-Javadoc)
@@ -40,9 +34,9 @@ public class SVMWraper implements Classifier {
 	@Override
 	public Result crossValidation(int folds) {
 		// optimize params
-		double[] predictions = new double[mergedProb.l];
-		svm.svm_cross_validation(mergedProb, param, folds, predictions);
-		return new Result(mergedProb.y, predictions);
+		double[] predictions = new double[trainProb.l];
+		svm.svm_cross_validation(trainProb, param, folds, predictions);
+		return new Result(trainProb.y, predictions);
 	}
 
 	/* (non-Javadoc)

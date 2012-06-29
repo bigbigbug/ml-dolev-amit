@@ -29,10 +29,8 @@ public class WekaWraper implements Classifier {
 	}
 
 	public WekaWraper(List<Sample> train, List<Sample> test) {
-		
 		convertInstances(train,trainDataSet);
 		convertInstances(test,testDataSet);
-		
 	}
 
 	private void convertInstances(List<Sample> train, Instances data) {
@@ -48,10 +46,9 @@ public class WekaWraper implements Classifier {
 
 	@Override
 	public Result crossValidation(int folds) {
-		Instances allData = Instances.mergeInstances(trainDataSet, testDataSet);
 		try {
-			Evaluation eval = new Evaluation(allData);
-			eval.crossValidateModel(classifier, allData, 10, new Random(1));
+			Evaluation eval = new Evaluation(trainDataSet);
+			eval.crossValidateModel(classifier, trainDataSet, 10, new Random(1));
 			return new Result(eval.confusionMatrix(), eval.correct(), eval.numInstances());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -60,15 +57,13 @@ public class WekaWraper implements Classifier {
 
 	@Override
 	public Result trainTest() {
-//		Instances allData = Instances.mergeInstances(trainDataSet, testDataSet);
-//		try {
-//			Evaluation eval = new Evaluation(allData);
-//			eval.crossValidateModel(classifier, allData, 10, new Random(1));
-//			return new Result(eval.confusionMatrix(), eval.correct(), eval.numInstances());
-//		} catch (Exception e) {
-//			throw new RuntimeException(e);
-//		}
-		return null;
+		try {
+			Evaluation eval = new Evaluation(trainDataSet);
+			eval.evaluateModel(classifier, testDataSet);
+			return new Result(eval.confusionMatrix(), eval.correct(), eval.numInstances());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
