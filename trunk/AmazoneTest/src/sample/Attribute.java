@@ -1,5 +1,8 @@
 package sample;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An attribute, which is represented by a number (id) and a value.
  * The class implements {@link Comparable} interface, and compares according to the id.
@@ -9,10 +12,38 @@ package sample;
  */
 public class Attribute implements Comparable<Attribute> {
 	public final int attributeNumber;
-	public final double value;
+	private final double value;
+	
+	private class AttributeStatistics {
+		public void addValue(double v) {
+			max = Math.max(max, v);
+			min = Math.min(min, v);
+//			count++;
+//			average += (double)v/(double)count;
+		}
+		
+		double max = 0;
+		double min = 0;
+//		double average = 0;
+//		int count = 0;
+	}
+	
+	private static Map<Integer,AttributeStatistics> stats = new HashMap<Integer,AttributeStatistics>();
+	public static void clearAttributeStatistics(){
+		stats = new HashMap<Integer,AttributeStatistics>();
+	}
+	
 	Attribute(int attributeNumber, double value) {
+		AttributeStatistics attStat = stats.get(attributeNumber);
+		if (attStat == null) {
+			attStat = new AttributeStatistics();
+			stats.put(attributeNumber, attStat);
+		}
+		attStat.addValue(value);
+		
 		this.attributeNumber = attributeNumber;
 		this.value = value;
+		
 	}
 	
 	@Override
@@ -40,6 +71,11 @@ public class Attribute implements Comparable<Attribute> {
 		if (attributeNumber != other.attributeNumber)
 			return false;
 		return true;
+	}
+
+	public double getValue() {
+		AttributeStatistics attStat = stats.get(attributeNumber);
+		return Math.min(1, value / (attStat.max - attStat.min) );
 	}
 	
 }

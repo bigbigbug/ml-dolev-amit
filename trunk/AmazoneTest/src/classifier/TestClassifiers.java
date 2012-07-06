@@ -10,15 +10,25 @@ import feature.selection.FeatureSelector;
 public class TestClassifiers {
 	
 	public static void main(String[] args) throws IOException {
-		Classifier cls = ClassifierFactory.getClassifier(ClassifierType.SVM_LINEAR, 
-				SamplesManager.getInstance(), new File(SamplesManager.DATA_DIR), FeatureSelector.NONE);
+		
+		ClassifierType type = ClassifierType.SVM_HYPERBOLIC;
+//		ClassifierType type = ClassifierType.SVM_LINEAR;
+//		ClassifierType type = ClassifierType.NAIVE_BAYSE;
+		
+		Classifier cls = ClassifierFactory.getClassifier(type, SamplesManager.getInstance(),
+				 new File(SamplesManager.DATA_DIR), FeatureSelector.NONE);
+
+		
+//		Result res = cls.trainTest();
 		Result res = cls.crossValidation(10);
-		System.out.println("Final Results");
-		System.out.println("Num Samples: " + res.numSamples);
-		System.out.println("Correct Samples: " + res.correctSamples);
-		System.out.println("Acuracy: " + res.accuracy());
-		System.out.println("Conf mat:");
-		System.out.println( res.confMatString());
+		
+		
+		System.err.println("Final Results");
+		System.err.println("Num Samples: " + res.numSamples);
+		System.err.println("Correct Samples: " + res.correctSamples);
+		System.err.println("Acuracy: " + res.accuracy());
+		System.err.println("Conf mat:");
+		System.err.println( res.confMatString());
 		
 		
 	}
