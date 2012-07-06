@@ -19,11 +19,11 @@ public class WekaWraper implements Classifier {
 	private final Instances testDataSet = new Instances("testData", atts, 10000);
 	private final NaiveBayesMultinomial classifier = new NaiveBayesMultinomial();
 	
-	private static ArrayList<Attribute> atts = new ArrayList<Attribute>();
+	private static final int numAtts = SamplesManager.getInstance().numAttributes();
+	private static final ArrayList<Attribute> atts = new ArrayList<Attribute>();
 	static {
-		int numAtts = SamplesManager.getInstance().numAttributes();
-		
-		for (int i = 0; i < numAtts; i++) {
+		System.out.println();
+		for (int i = 0; i < numAtts+1; i++) {
 			atts.add(i,new Attribute(Integer.toString(i)));
 		}
 	}
@@ -34,13 +34,15 @@ public class WekaWraper implements Classifier {
 	}
 
 	private void convertInstances(List<Sample> train, Instances data) {
+		data.setClass(atts.get(numAtts));
 		for (Sample s : train) {
 			Instance instance= new SparseInstance(s.attributes.size());
-			instance.setClassValue(s.classification);
-			for (sample.Attribute nextAtt : s.attributes) {
-				instance.setValue(atts.get(nextAtt.attributeNumber), nextAtt.value);
-			}
+			instance.setDataset(data);
 			data.add(instance);
+			for (sample.Attribute nextAtt : s.attributes) {
+				instance.setValue(atts.get(nextAtt.attributeNumber), nextAtt.getValue());
+			}
+			instance.setClassValue(s.classification);
 		}
 	}
 
