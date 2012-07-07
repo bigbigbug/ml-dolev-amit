@@ -108,11 +108,11 @@ public class SVMWraper implements Classifier {
 		return predictions;
 	}
 
-	// TODO when performin real tests increase the search
-	private static final int C_MIN_POWER = -2;
-	private static final int C_MAX_POWER = 0;
-	private static final int G_MIN_POWER = -7;
-	private static final int G_MAX_POWER = -4;
+	// TODO when performing real tests increase the search
+	private static final int C_MIN_POWER = -2; // -5
+	private static final int C_MAX_POWER = -2; // +5
+	private static final int G_MIN_POWER = -7; // -9
+	private static final int G_MAX_POWER = -4; //  0 not sure
 	private static final int PARAM_OPTIMIZE_FOLDS = 2;
 
 	private void optimizeParams(svm_problem problem, svm_parameter param) {
