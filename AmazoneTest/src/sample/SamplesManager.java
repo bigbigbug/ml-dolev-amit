@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 
@@ -16,7 +17,7 @@ import crawler.amazon.files_creator.DataFilesCreator;
 import feature.selection.FeatureSelector;
 
 public class SamplesManager {
-	
+
 	private FeatureSelector featureSelector;
 	public static final String DATA_DIR = DataFilesCreator.RESULT_DIR_NAME;
 	private static final int DATA_DOC_IDX = 0;
@@ -66,12 +67,43 @@ public class SamplesManager {
 		if (!dataFile.exists()) throw new FileNotFoundException("The data file was not found");
 		File labelFile = new File(dir,classificationFileName);
 		if (!labelFile.exists()) throw new FileNotFoundException("The classificatrion file was not found");
+
+		populateMaxOccurancesMap(dataFile);
+		populateMinOccurancesMap(dataFile);
+
 		populateHistogram(dataFile);
 		List<Sample> samples = createSamples(dataFile,labelFile);
 		this.featureSelector = featureSelector;
 		return featureSelector.selectFeatresFromTrain(samples);
 	}
-	
+
+	private Map<Integer,Integer> maxMap = new HashMap<Integer, Integer>();
+	private void populateMaxOccurancesMap(File dataFile) throws FileNotFoundException, IOException {
+		BufferedReader br = new BufferedReader(new FileReader(dataFile));
+		String line;
+		while ((line = br.readLine()) != null) {
+			line = line.trim();
+			if (line.length() == 0) continue;
+			String[] arr = line.split("\\s");
+			Integer wordId = new Integer(arr[DATA_WORD_IDX]);
+			Integer occs = maxMap.get(wordId);
+			maxMap.put(wordId, occs == null? 1 : occs  + 1);
+		}
+	}
+	private Map<Integer,Integer> minMap = new HashMap<Integer, Integer>();
+	private void populateMinOccurancesMap(File dataFile) throws FileNotFoundException, IOException {
+		BufferedReader br = new BufferedReader(new FileReader(dataFile));
+		String line;
+		while ((line = br.readLine()) != null) {
+			line = line.trim();
+			if (line.length() == 0) continue;
+			String[] arr = line.split("\\s");
+			Integer wordId = new Integer(arr[DATA_WORD_IDX]);
+			Integer occs = minMap.get(wordId);
+			minMap.put(wordId, occs == null? 1 : occs  + 1);
+		}
+	}
+
 	/**
 	 * creates a list of test samples. The parser does not add the new attributes to the idf counter.
 	 * It parses the data from the default files and dir. 
@@ -85,7 +117,7 @@ public class SamplesManager {
 		File dir = new File(DATA_DIR);
 		return parseTestData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME);
 	}
-	
+
 	/**
 	 * creates a list of test samples. The parser does not add the new attributes to the idf counter.
 	 * It must be called after parseTrainDate() 
@@ -106,7 +138,7 @@ public class SamplesManager {
 		if (!labelFile.exists()) throw new FileNotFoundException("The classificatrion file was not found");
 		List<Sample> samples = createSamples(dataFile,labelFile);
 		return featureSelector.filterFeaturesFromTest(samples);
-		
+
 	}
 	/**
 	 * Given a data file and a label file, it gets all samples from these files, including calculating tf-idf 
@@ -134,16 +166,27 @@ public class SamplesManager {
 				attributes = new ArrayList<Attribute>();
 				currDoc = newCurrDoc;
 			}
-			int docId = Integer.parseInt(arr[DATA_WORD_IDX]);
+			int wordId = Integer.parseInt(arr[DATA_WORD_IDX]);
 			int count = Integer.parseInt(arr[DATA_COUNT_IDX]);
-			double value = idfValue(docId);
+			double value = idfValue(wordId);
 			//if the attribute is unknown, ignore it.
 			if (value < 0) continue;
-			value *= count;
-			Attribute attribute = new Attribute(docId,value);
+			value *= normalize(count,wordId);
+			Attribute attribute = new Attribute(wordId,value);
 			attributes.add(attribute);
 		}
 		return samples;
+	}
+
+	private double normalize(int count, int wordId) {
+		int max = maxMap.get(wordId);
+		int min = minMap.get(wordId);
+		if (max == min || count > max) return 1;
+		double d  = count;
+		d -= (min-1);
+		d /= (max - (min - 1) );
+		return d;
+		
 	}
 
 	private void populateHistogram(File dataFile) throws IOException {
@@ -158,16 +201,17 @@ public class SamplesManager {
 			idfMap.put(docId, count == null? 1 : count + 1);
 		}
 	}
-/**
- * finds the idf value of a given doc. Note: The idf value is calculated ONLY on the train data.
- * @param docId
- * @return the idf value of this document
- */
+	/**
+	 * finds the idf value of a given doc. Note: The idf value is calculated ONLY on the train data.
+	 * @param docId
+	 * @return the idf value of this document
+	 */
 	private double idfValue(int docId) {
 		double d  = idfMap.size();
 		Integer count = idfMap.get(docId);
 		if (count == null || count == 0) return -1;
 		d /= count;
+		if (true) return 1; //TODO: no commit
 		return Math.log(d);
 	}
 	/**
@@ -179,11 +223,11 @@ public class SamplesManager {
 		if (featureSelector == null) throw new IllegalStateException("Must invoke parseTrainData() first");
 		return featureSelector.numberOfFeatures();
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();
 		System.out.println(l.size());
 	}
-	
+
 }

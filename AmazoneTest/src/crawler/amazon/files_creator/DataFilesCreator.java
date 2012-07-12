@@ -70,14 +70,19 @@ public class DataFilesCreator {
 		}
 		Random r = new Random(SEED);
 		List<Review> reviews = choseRandomReviews(NUM_REVIEWS,r);
-		createMaps(reviews);
+//		createMaps(reviews);
 		writeFiles(reviews,r,resultDir);
 	}
 	private void writeFiles(List<Review> reviews,Random r,File outDir) throws IOException  {
 		Collections.shuffle(reviews,r);
 		int numTestFiles = (int)(((double)NUM_REVIEWS) * PERCENT_TEST);
-		createFiles(reviews.subList(0,numTestFiles),"test",outDir);
+		//first create the map for the train reviews, ensuring #features(train) >= max{id(feature) | all features in train}:
+		createMaps(reviews.subList(numTestFiles,reviews.size()));
+		//then add the test features 
+		createMaps(reviews.subList(0,numTestFiles));
+		//then, create files:
 		createFiles(reviews.subList(numTestFiles,reviews.size()),"train",outDir);
+		createFiles(reviews.subList(0,numTestFiles),"test",outDir);
 	}
 	private void createFiles(List<Review> subList, String fileName, File outDir) throws IOException {
 		File dataFile = new File(outDir,fileName + ".data");
