@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.Scanner;
 import java.util.TreeSet;
 
 import weka.classifiers.bayes.NaiveBayes;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 
@@ -238,7 +240,23 @@ public class SamplesManager {
 		return featureSelector.numberOfFeatures();
 	}
 
-
+	public static List<Sample> asSamplesList(Instances instances) {
+		List<Sample> samples = new ArrayList<Sample>();
+		Iterator<Instance> iter = instances.iterator();
+		while (iter.hasNext()) {
+			Instance curr = iter.next();
+			List<Attribute> attributes = new ArrayList<Attribute>();
+			for (int i = 0; i < curr.numValues(); i++) {
+				if (curr.index(i) == curr.classIndex()) continue;
+				int idx = curr.index(i);
+				double value = curr.value(curr.index(i));
+				Attribute attribute = new Attribute(idx,value);
+				attributes.add(attribute);
+			}
+			samples.add(new Sample(attributes,(int)Math.round(curr.classValue())+1));
+		}
+		return samples;
+	}
 	public static Instances asWekaInstances(List<Sample> samples) {
 
 		int numAtts = SamplesManager.getInstance().numAttributes();
@@ -276,23 +294,45 @@ public class SamplesManager {
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();
-		System.out.println(l.size());
-		System.out.println("");
-		NavigableSet<Integer> set = new TreeSet<Integer>();
-		double maxVal = -1;
-		for (Sample sample : l) {
-			for (Attribute att : sample.attributes) { 
-				set.add(att.attributeNumber);
-				maxVal = Math.max(maxVal, att.getValue());
-			}
+
+//		Instances temp = asWekaInstances(l);
+//		Instance inst = temp.iterator().next();
+//		System.out.println(inst.numValues());
+//		for (int i = 0 ; i < inst.numValues(); i++) { 
+//			if (inst.index(i) == inst.classIndex()) continue;
+//			System.out.println(inst.index(i));
+//			System.out.println(inst.value(inst.index(i)));
+//		}
+//		System.out.println(inst.classIndex());
+//		System.out.println(inst.classValue());
+
+
+		l = asSamplesList(asWekaInstances(l));
+		int minClass = 1000;
+		int maxClass = -1;
+		for (Sample s : l) { 
+			minClass = Math.min(minClass,s.classification);
+			maxClass = Math.max(maxClass, s.classification);
 		}
-		System.out.println(maxVal);
-		//		System.out.println(set.size());
-		//		System.out.println(set.last());
-		//		System.out.println("");
-		//		for (int x = 0; x <= set.last() ; x++) {
-		//			if (!set.contains(x)) System.out.println(x);
-		//		}
+		System.out.println(minClass);
+		System.out.println(maxClass);
+		
+		//				System.out.println(l.size());
+		//				System.out.println("");
+		//				NavigableSet<Integer> set = new TreeSet<Integer>();
+		//				for (Sample sample : l) {
+		//					for (Attribute att : sample.attributes) {
+		//						set.add(att.attributeNumber);
+		//					}
+		//					
+		//				}
+		//					
+		//				System.out.println(set.size());
+		//				System.out.println(set.last());
+		//				System.out.println("");
+		//				for (int x = 0; x <= set.last() ; x++) {
+		//					if (!set.contains(x)) System.out.println(x);
+		//				}
 	}
 
 }
