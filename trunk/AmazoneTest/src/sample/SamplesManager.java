@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NavigableSet;
 import java.util.Scanner;
+import java.util.TreeSet;
 
 
 import crawler.amazon.files_creator.DataFilesCreator;
@@ -152,7 +154,7 @@ public class SamplesManager {
 		Scanner sc = new Scanner(labelFile);
 		String line;
 		List<Sample> samples = new ArrayList<Sample>();
-		int currDoc = -1;
+		int currDoc = 1;
 		List<Attribute> attributes  = new ArrayList<Attribute>();
 		while ((line = br.readLine()) != null) {
 			line = line.trim();
@@ -175,6 +177,11 @@ public class SamplesManager {
 			Attribute attribute = new Attribute(wordId,value);
 			attributes.add(attribute);
 		}
+		//handle last doc:
+		int label = sc.nextInt();
+		Sample sample = new Sample(attributes, label);
+		samples.add(sample);
+		
 		return samples;
 	}
 
@@ -228,6 +235,19 @@ public class SamplesManager {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();
 		System.out.println(l.size());
+		System.out.println("");
+		NavigableSet<Integer> set = new TreeSet<Integer>();
+		for (Sample sample : l) {
+			for (Attribute att : sample.attributes) { 
+				set.add(att.attributeNumber);
+			}
+		}
+		System.out.println(set.size());
+		System.out.println(set.last());
+		System.out.println("");
+		for (int x = 0; x <= set.last() ; x++) {
+			if (!set.contains(x)) System.out.println(x);
+		}
 	}
 
 }
