@@ -89,7 +89,8 @@ public class SamplesManager {
 			String[] arr = line.split("\\s");
 			Integer wordId = new Integer(arr[DATA_WORD_IDX]);
 			Integer occs = maxMap.get(wordId);
-			maxMap.put(wordId, occs == null? 1 : occs  + 1);
+			Integer currOccs = new Integer(arr[DATA_COUNT_IDX]);
+			maxMap.put(wordId, occs == null? currOccs : Math.max(currOccs,occs));
 		}
 	}
 	private Map<Integer,Integer> minMap = new HashMap<Integer, Integer>();
@@ -102,7 +103,8 @@ public class SamplesManager {
 			String[] arr = line.split("\\s");
 			Integer wordId = new Integer(arr[DATA_WORD_IDX]);
 			Integer occs = minMap.get(wordId);
-			minMap.put(wordId, occs == null? 1 : occs  + 1);
+			Integer currOccs = new Integer(arr[DATA_COUNT_IDX]);
+			minMap.put(wordId, occs == null? currOccs : Math.min(currOccs,occs));
 		}
 	}
 
@@ -237,17 +239,20 @@ public class SamplesManager {
 		System.out.println(l.size());
 		System.out.println("");
 		NavigableSet<Integer> set = new TreeSet<Integer>();
+		double maxVal = -1;
 		for (Sample sample : l) {
 			for (Attribute att : sample.attributes) { 
 				set.add(att.attributeNumber);
+				maxVal = Math.max(maxVal, att.getValue());
 			}
 		}
-		System.out.println(set.size());
-		System.out.println(set.last());
-		System.out.println("");
-		for (int x = 0; x <= set.last() ; x++) {
-			if (!set.contains(x)) System.out.println(x);
-		}
+		System.out.println(maxVal);
+//		System.out.println(set.size());
+//		System.out.println(set.last());
+//		System.out.println("");
+//		for (int x = 0; x <= set.last() ; x++) {
+//			if (!set.contains(x)) System.out.println(x);
+//		}
 	}
 
 }
