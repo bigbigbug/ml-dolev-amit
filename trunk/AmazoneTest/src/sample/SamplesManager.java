@@ -7,12 +7,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Scanner;
 import java.util.TreeSet;
+
+import weka.classifiers.bayes.NaiveBayes;
+import weka.core.Instances;
+import weka.core.SparseInstance;
 
 
 import crawler.amazon.files_creator.DataFilesCreator;
@@ -183,7 +188,7 @@ public class SamplesManager {
 		int label = sc.nextInt();
 		Sample sample = new Sample(attributes, label);
 		samples.add(sample);
-		
+
 		return samples;
 	}
 
@@ -195,7 +200,7 @@ public class SamplesManager {
 		d -= (min-1);
 		d /= (max - (min - 1) );
 		return d;
-		
+
 	}
 
 	private void populateHistogram(File dataFile) throws IOException {
@@ -233,6 +238,41 @@ public class SamplesManager {
 		return featureSelector.numberOfFeatures();
 	}
 
+
+	public static Instances asWekaInstances(List<Sample> samples) {
+
+		int numAtts = SamplesManager.getInstance().numAttributes();
+		ArrayList<weka.core.Attribute> atts = new ArrayList<weka.core.Attribute>();
+		for (int i = 0; i < numAtts; i++) {
+			atts.add(i,new weka.core.Attribute(Integer.toString(i)));
+		}
+		List<String> labels = new LinkedList<String>();
+		labels.add("1");
+		labels.add("2");
+		labels.add("3");
+
+		atts.add(numAtts,new weka.core.Attribute("class",labels));
+
+		Instances data = new Instances("trainData", atts, samples.size());
+
+		data.setClass(atts.get(numAtts));
+		for (Sample s : samples) {
+			int size = s.attributes.size()+1;
+			int attIndex[] = new int[size]; 
+			double attVals[] = new double[size];
+			int location = 0;
+			for (sample.Attribute nextAtt : s.attributes) {
+				attIndex[location] = nextAtt.attributeNumber; 
+				attVals[location] = nextAtt.getValue();
+				location++;
+			}
+			attIndex[location] = numAtts; 
+			attVals[location] = s.classification-1;
+			data.add(new SparseInstance(1.0, attVals, attIndex, size));
+		}
+		return data;
+	}
+
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
 		List<Sample> l = sm.parseTrainData();
@@ -247,12 +287,12 @@ public class SamplesManager {
 			}
 		}
 		System.out.println(maxVal);
-//		System.out.println(set.size());
-//		System.out.println(set.last());
-//		System.out.println("");
-//		for (int x = 0; x <= set.last() ; x++) {
-//			if (!set.contains(x)) System.out.println(x);
-//		}
+		//		System.out.println(set.size());
+		//		System.out.println(set.last());
+		//		System.out.println("");
+		//		for (int x = 0; x <= set.last() ; x++) {
+		//			if (!set.contains(x)) System.out.println(x);
+		//		}
 	}
 
 }
