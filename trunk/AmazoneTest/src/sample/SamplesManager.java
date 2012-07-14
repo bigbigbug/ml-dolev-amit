@@ -289,7 +289,7 @@ public class SamplesManager {
 			int location = 0;
 			for (sample.Attribute nextAtt : s.attributes) {
 				attIndex[location] = nextAtt.attributeNumber; 
-				attVals[location] = nextAtt.getValue();
+				attVals[location] = nextAtt.value;
 				location++;
 			}
 			attIndex[location] = numAtts; 
