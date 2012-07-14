@@ -1,23 +1,22 @@
 package sample;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * An attribute, which is represented by a number (id) and a value.
- * The class implements {@link Comparable} interface, and compares according to the id.
+ * An attribute, which is represented by a number (id) and a value. The class
+ * implements {@link Comparable} interface, and compares according to the id.
  * The hashCode() and equals() are also implemented according to ID alone.
+ * 
  * @author AmitGross
- *
+ * 
  */
 public class Attribute implements Comparable<Attribute> {
 	public final int attributeNumber;
 	public final double value;
+
 	Attribute(int attributeNumber, double value) {
 		this.attributeNumber = attributeNumber;
 		this.value = value;
 	}
-	
+
 	@Override
 	public int compareTo(Attribute o) {
 		return attributeNumber - o.attributeNumber;
