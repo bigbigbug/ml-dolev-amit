@@ -18,7 +18,7 @@ public class Sample {
 	Sample(List<Attribute> attributes, int classification) {
 		this.classification = classification;
 		this.attributes = attributes;
-		Collections.sort(attributes);
+		Collections.sort(this.attributes);
 	}
 	
 	public Sample(Sample original, Set<Attribute> useOnlyThisAttributes) { 
@@ -28,5 +28,6 @@ public class Sample {
 			if (useOnlyThisAttributes.contains(att)) 
 				attributes.add(att);
 		}
+		Collections.sort(attributes);
 	}
 }
