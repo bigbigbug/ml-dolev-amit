@@ -250,7 +250,7 @@ public class SamplesManager {
 			List<Attribute> atts = new ArrayList<Attribute>();
 			for (Attribute att : s.attributes) {
 				int idx = Arrays.binarySearch(selectedFeatures, att.attributeNumber);
-				if (idx >= 0) atts.add(new Attribute(idx, att.getValue()));
+				if (idx >= 0) atts.add(new Attribute(idx, att.value));
 			}
 			result.add(new Sample(atts, s.classification));
 		}
