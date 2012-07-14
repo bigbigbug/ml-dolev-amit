@@ -6,19 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NavigableSet;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
@@ -26,6 +25,8 @@ import weka.core.SparseInstance;
 
 import crawler.amazon.files_creator.DataFilesCreator;
 import feature.selection.FeatureSelector;
+import feature.selection.GeneticCFSFeatureSelector;
+import feature.selection.InformationGainFeatureSelector;
 import feature.selection.PCASelector;
 
 public class SamplesManager {
@@ -242,7 +243,20 @@ public class SamplesManager {
 		if (featureSelector == null) throw new IllegalStateException("Must invoke parseTrainData() first");
 		return featureSelector.numberOfFeatures();
 	}
-
+	
+	public static List<Sample> reduceDimensions(List<Sample> samples, int[] selectedFeatures) {
+		List<Sample> result = new ArrayList<Sample>();
+		for (Sample s : samples) {
+			List<Attribute> atts = new ArrayList<Attribute>();
+			for (Attribute att : s.attributes) {
+				int idx = Arrays.binarySearch(selectedFeatures, att.attributeNumber);
+				if (idx >= 0) atts.add(new Attribute(idx, att.getValue()));
+			}
+			result.add(new Sample(atts, s.classification));
+		}
+		return result;
+	}
+	
 	public static List<Sample> asSamplesList(Instances instances) {
 		List<Sample> samples = new ArrayList<Sample>();
 		Iterator<Instance> iter = instances.iterator();
@@ -301,7 +315,7 @@ public class SamplesManager {
 
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = SamplesManager.getInstance();
-		List<Sample> l = sm.parseTrainData();
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new InformationGainFeatureSelector(100));
 
 		//		Instances temp = asWekaInstances(l);
 		//		Instance inst = temp.iterator().next();
