@@ -1,6 +1,8 @@
 package classifier;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import libsvm.svm;
 import libsvm.svm_model;
@@ -41,27 +43,23 @@ public class SVMWraper implements Classifier {
 	 */
 	@Override
 	public Result crossValidation(int numFolds) {
-		// optimize params
-		
 		// split to folds
 		svm_problem folds[] = new svm_problem[numFolds];
-		// create the empty problems
+		// get random permutation
+		Random rand = new Random(1);
+		List<Integer> perm = randPerm(trainProb.l, rand);
+		int prev = 0;
 		for (int i = 0; i < folds.length; i++) {
 			folds[i] = new svm_problem();
-			folds[i].l = new Double(Math.ceil((trainProb.l - i)
-					/ (double) numFolds)).intValue();
+			folds[i].l = new Double(Math.ceil((trainProb.l - i) / (double) numFolds)).intValue();
 			folds[i].y = new double[folds[i].l];
 			folds[i].x = new svm_node[folds[i].l][];
-		}
-		int f = 0;
-		int index;
-		// fill up the problems by take every 10th sample
-		// TODO consider getting a random permutation
-		for (int i = 0; i < trainProb.l; i++) {
-			index = new Double(Math.floor(i / numFolds)).intValue();
-			f = ++f % numFolds;
-			folds[f].y[index] = trainProb.y[i];
-			folds[f].x[index] = trainProb.x[i];
+			for (int j = 0; j < folds[i].l; j++) {
+				int index = perm.get(j + prev);
+				folds[i].y[j] = trainProb.y[index];
+				folds[i].x[j] = trainProb.x[index];
+			}
+			prev += folds[i].l;
 		}
 
 		double foldResults[][] = new double[numFolds][];
@@ -69,11 +67,12 @@ public class SVMWraper implements Classifier {
 		for (int i = 0; i < folds.length; i++) {
 			svm_problem agrigatetProblem = new svm_problem();
 			agrigatetProblem.l = 0;
-			double y[][] = new double[numFolds-1][];
-			svm_node x[][][] = new svm_node[numFolds-1][][];
+			double y[][] = new double[numFolds - 1][];
+			svm_node x[][][] = new svm_node[numFolds - 1][][];
 			int pos = 0;
 			for (int j = 0; j < folds.length; j++) {
-				if (i == j) continue;
+				if (i == j)
+					continue;
 				agrigatetProblem.l += folds[pos].l;
 				y[pos] = folds[pos].y;
 				x[pos] = folds[pos].x;
@@ -85,6 +84,14 @@ public class SVMWraper implements Classifier {
 		}
 
 		return new Result(trainProb.y, concatAll(foldResults));
+	}
+
+	private List<Integer> randPerm(int length, Random rand) {
+		List<Integer> perm = new LinkedList<Integer>();
+		for (int i = 0; i < length; i++)
+			perm.add(i);
+		java.util.Collections.shuffle(perm, rand);
+		return perm;
 	}
 
 	/*
@@ -109,25 +116,28 @@ public class SVMWraper implements Classifier {
 	}
 
 	// TODO when performing real tests increase the search
-	private static final int C_MIN_POWER = -2; // -5
-	private static final int C_MAX_POWER = -2; // +5
-	private static final int G_MIN_POWER = -4; // -9
-	private static final int G_MAX_POWER = -4; //  0 not sure
+	private static final int C_MIN_POWER = -3; // -5
+	private static final int C_MAX_POWER = 3; // +5
+	private static final int G_MIN_POWER = -3; // -9
+	private static final int G_MAX_POWER = 3; // 0 not sure
 	private static final int PARAM_OPTIMIZE_FOLDS = 2;
 
 	private void optimizeParams(svm_problem problem, svm_parameter param) {
+		if (true) { // TODO Run optimization
+			param.C = 1000;
+			param.gamma = 0.01;
+			return;
+		}
 		double[] predictions = new double[problem.l];
 		double bestC = 0;
 		double bestG = 0;
 		double bestCacc = 0;
 		for (int c = C_MIN_POWER; c <= C_MAX_POWER; c++) {
 			for (int g = G_MIN_POWER; g <= G_MAX_POWER; g++) {
-				param.C = Math.pow(2, c);
-				param.gamma = Math.pow(2, g);
-				svm.svm_cross_validation(problem, param,
-						PARAM_OPTIMIZE_FOLDS, predictions);
-				double accuracy = (new Result(problem.y, predictions))
-						.accuracy();
+				param.C = Math.pow(10, c);
+				param.gamma = Math.pow(10, g);
+				svm.svm_cross_validation(problem, param, PARAM_OPTIMIZE_FOLDS, predictions);
+				double accuracy = (new Result(problem.y, predictions)).accuracy();
 				if (accuracy > bestCacc) {
 					bestC = c;
 					bestG = g;
@@ -135,10 +145,10 @@ public class SVMWraper implements Classifier {
 				}
 			}
 		}
-		System.err.println("Best C : " + Math.pow(2, bestC));
-		System.err.println("Best gamma : " + Math.pow(2, bestG));
-		param.C = Math.pow(2, bestC);
-		param.gamma = Math.pow(2, bestC);
+		System.err.println("Best C : " + Math.pow(10, bestC));
+		System.err.println("Best gamma : " + Math.pow(10, bestG));
+		param.C = Math.pow(10, bestC);
+		param.gamma = Math.pow(10, bestC);
 		;
 
 	}
@@ -189,15 +199,13 @@ public class SVMWraper implements Classifier {
 	}
 
 	public void setHyperbolic() {
-		param.kernel_type = svm_parameter.RBF; // TODO make sure this is correct
+		param.kernel_type = svm_parameter.RBF;
 	}
 
 	public void setLinear() {
 		param.kernel_type = svm_parameter.LINEAR;
 	}
 
-	
-	
 	// TODO check moving to generic
 	private double[] concatAll(double[][] toMerge) {
 		int totalLength = 0;
@@ -212,6 +220,7 @@ public class SVMWraper implements Classifier {
 		}
 		return result;
 	}
+
 	private svm_node[][] concatAll(svm_node[][][] toMerge) {
 		int totalLength = 0;
 		for (svm_node[][] array : toMerge) {
