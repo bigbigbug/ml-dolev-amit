@@ -111,7 +111,7 @@ public class SVMWraper implements Classifier {
 	// TODO when performing real tests increase the search
 	private static final int C_MIN_POWER = -2; // -5
 	private static final int C_MAX_POWER = -2; // +5
-	private static final int G_MIN_POWER = -7; // -9
+	private static final int G_MIN_POWER = -4; // -9
 	private static final int G_MAX_POWER = -4; //  0 not sure
 	private static final int PARAM_OPTIMIZE_FOLDS = 2;
 
@@ -155,11 +155,11 @@ public class SVMWraper implements Classifier {
 			prob.x[i] = new svm_node[numAtt];
 			for (int j = 0; j < numAtt; j++) {
 				Attribute att = samplesAtt.get(j);
-				if (att.getValue() > 2)
+				if (att.value > 2)
 					badAtt++;
 				prob.x[i][j] = new svm_node();
 				prob.x[i][j].index = att.attributeNumber;
-				prob.x[i][j].value = att.getValue();
+				prob.x[i][j].value = att.value;
 			}
 			prob.y[i] = samples.get(i).classification;
 		}
