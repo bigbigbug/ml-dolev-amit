@@ -1,51 +1,50 @@
 package feature.selection;
 
+import java.nio.channels.IllegalSelectorException;
 import java.util.List;
 
 import sample.Sample;
 import sample.SamplesManager;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
 import weka.core.Instances;
 
 public class PCASelector implements FeatureSelector {
-	AttributeSelection selector = new AttributeSelection();
+	private final int numFeatures;
+	private int[] attributes;
+	public PCASelector(int numFeatures) {
+		this.numFeatures = numFeatures;
+	}
 	@Override
 	public List<Sample> selectFeatresFromTrain(List<Sample> trainSet) {
 		PrincipalComponents pca = new PrincipalComponents();
-		
-		selector.setEvaluator(pca);
-		selector.setSearch(new Ranker());
+		Ranker ranker = new Ranker();
+		ranker.setNumToSelect(numFeatures);
 		Instances instances = SamplesManager.asWekaInstances(trainSet);
 		try { 
-			selector.SelectAttributes(instances);
-			return SamplesManager.asSamplesList(selector.reduceDimensionality(instances));
+			pca.buildEvaluator(instances);
+			attributes = ranker.search(pca, instances);
 		} catch (Exception e ) {
 			e.printStackTrace();
 			return null;
 		}
+		return SamplesManager.reduceDimensions(trainSet,attributes);
 	}
 
 	@Override
 	public List<Sample> filterFeaturesFromTest(List<Sample> testSet)
 			throws IllegalStateException {
-		try { 
-			return SamplesManager.asSamplesList(selector.reduceDimensionality(SamplesManager.asWekaInstances(testSet)));
-		} catch (Exception e) { 
-			e.printStackTrace();
-			return null;
-		}
+		if (attributes == null) throw new IllegalStateException("Must invoke selectFeaturesFromTrain() first");
+		return SamplesManager.reduceDimensions(testSet, attributes);
 	}
 
 	@Override
 	public int numberOfFeatures() {
-		try { 
-			return selector.numberAttributesSelected();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return -1;
-		}
+		if (attributes == null) throw new IllegalStateException("Must invoke selectFeaturesFromTrain() first");
+		return numFeatures;
 	}
 
 }

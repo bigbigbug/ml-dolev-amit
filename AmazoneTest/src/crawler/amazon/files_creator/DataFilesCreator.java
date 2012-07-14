@@ -30,11 +30,11 @@ public class DataFilesCreator {
 	public static final String RAW_DIR_NAME = "data/lenses/raw";
 	public static final String RESULT_DIR_NAME = "data/lenses/processed";
 	public static final long SEED = 5;
-	public static final int NUM_REVIEWS = 3000;
-	public static final double PER_PRO = 0.3;
-	public static final double PER_AGAINST = 0.3;
-	public static final double PER_NEUTRAL = 0.2;
-	private static final double PERCENT_TEST = 0.1;
+	public static final int NUM_REVIEWS = 3200;
+	public static final double PER_PRO = 0.3333;
+	public static final double PER_AGAINST = 0.3333;
+	public static final double PER_NEUTRAL = 0.3333;
+	private static final double PERCENT_TEST = 0.3;
 	
 	private List<Review> against;
 	private List<Review> neutrals;
