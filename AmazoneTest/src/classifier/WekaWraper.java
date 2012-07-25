@@ -8,7 +8,6 @@ import sample.Sample;
 import sample.SamplesManager;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayesMultinomial;
-import weka.core.Attribute;
 import weka.core.Instances;
 
 public class WekaWraper implements Classifier {
@@ -17,15 +16,6 @@ public class WekaWraper implements Classifier {
 	private final Instances testDataSet;
 	private final weka.classifiers.Classifier classifier = new NaiveBayesMultinomial();
 	
-	private static final int numAtts = SamplesManager.getInstance().numAttributes();
-	private static final ArrayList<Attribute> atts = new ArrayList<Attribute>();
-	static {
-		System.out.println();
-		for (int i = 0; i < numAtts+1; i++) {
-			atts.add(i,new Attribute(Integer.toString(i)));
-		}
-	}
-
 	public WekaWraper(List<Sample> train, List<Sample> test) {
 		trainDataSet = SamplesManager.asWekaInstances(train);
 		testDataSet = SamplesManager.asWekaInstances(test);
