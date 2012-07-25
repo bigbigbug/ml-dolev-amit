@@ -42,17 +42,10 @@ public class SamplesManager {
 	private static final String TEST_DATA_FILE_NAME = "test.data";
 	private static SamplesManager INSTANCE;
 	private Map<Integer,Integer> idfMap;
-	private SamplesManager() {
+	public SamplesManager() {
 		idfMap = new HashMap<Integer, Integer>();
 	}
 
-	/**
-	 * @return an instance of the SamplesManager object
-	 */
-	public static SamplesManager getInstance() { 
-		if (INSTANCE == null) INSTANCE = new SamplesManager();
-		return INSTANCE;
-	}
 	/**
 	 * parses a train data, from the default dir and file names
 	 * It also has side affect of modifying the idf list according to the data.
@@ -314,8 +307,8 @@ public class SamplesManager {
 	}
 
 	public static void main(String[] args) throws Exception {
-		SamplesManager sm = SamplesManager.getInstance();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new InformationGainFeatureSelector(100));
+		SamplesManager sm = new SamplesManager();
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new PCASelector(2));
 
 		//		Instances temp = asWekaInstances(l);
 		//		Instance inst = temp.iterator().next();

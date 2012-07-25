@@ -16,6 +16,10 @@ public class ClassifierFactory {
 		SVM_LINEAR, SVM_HYPERBOLIC, NAIVE_BAYSE
 	}
 	
+	private static final String CLASSIFICATION_FILE_NAME = "train.label";
+	private static final String DATA_FILE_NAME = "train.data";
+	private static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
+	private static final String TEST_DATA_FILE_NAME = "test.data";
 	/**
 	 * Returns an instance of a {@link Classifier}.
 	 * @param type: type of classifier used
@@ -26,10 +30,14 @@ public class ClassifierFactory {
 	 * @param featuresSelector:  The type of {@link FeatureSelector} to use
 	 * @return
 	 * @throws IOException
-	 * @throws FileNotFoundException
+	 * @throws FileNotFoundException 
 	 */
-	public static Classifier getClassifier(ClassifierType type, List<Sample> train, List<Sample> test) 
+	public static Classifier getClassifier(ClassifierType type, SamplesManager samplesManager,File dir
+			, FeatureSelector featuresSelector ) 
 					throws IOException, FileNotFoundException {
+		
+		List<Sample> train = samplesManager.parseTrainData(dir,DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,featuresSelector);
+		List<Sample> test = samplesManager.parseTestData(dir,TEST_DATA_FILE_NAME,TEST_CLASSIFICATION_FILE_NAME);
 		
 		Classifier retVal = null;
 		switch (type) {
