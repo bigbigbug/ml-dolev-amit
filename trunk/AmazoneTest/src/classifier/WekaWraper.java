@@ -19,14 +19,14 @@ public class WekaWraper implements Classifier {
 	public WekaWraper(List<Sample> train, List<Sample> test) {
 		trainDataSet = SamplesManager.asWekaInstances(train);
 		testDataSet = SamplesManager.asWekaInstances(test);
-		System.out.println(testDataSet.firstInstance());
+//		System.out.println(testDataSet.firstInstance());
 	}
 
 	@Override
 	public Result crossValidation(int folds) {
 		try {
 			Evaluation eval = new Evaluation(trainDataSet);
-			eval.crossValidateModel(classifier, trainDataSet, 10, new Random(1));
+			eval.crossValidateModel(classifier, trainDataSet, folds, new Random(1));
 			return new Result(eval.confusionMatrix(), eval.correct(), eval.numInstances());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
