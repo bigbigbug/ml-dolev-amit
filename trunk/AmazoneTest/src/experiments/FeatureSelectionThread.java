@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -61,9 +62,13 @@ public class FeatureSelectionThread extends Thread {
 				//TODO: remove and switch to file write
 				writer.write("#features=" + x + " accuracy=" + res.accuracy() + "\n");
 			}
-			writer.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally { 
+			try { 
+				writer.close();
+			} catch (Exception e) { }
 		}
 
 	}
@@ -96,11 +101,16 @@ public class FeatureSelectionThread extends Thread {
 				e.printStackTrace();
 			}
 		}
-		File[] files = outputDir.listFiles();
+		File[] files = outputDir.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File arg0, String arg1) {
+				return arg1.startsWith("_tmp_");
+			}
+		});
 		Arrays.sort(files, new Comparator<File>() {
 			@Override
 			public int compare(File f1, File f2) {
-				return f1.getName().compareTo(f2.getName());
+				return new Integer(f1.getName().split("_")[2]).compareTo(new Integer(f2.getName().split("_")[2]));
 			}
 		});
 		File resFile = new File(outputDir,"accuracy_results.txt");
@@ -113,12 +123,13 @@ public class FeatureSelectionThread extends Thread {
 			while ((line = br.readLine()) != null) {
 				bw.write(line + "\n");
 			}
+			file.delete();
 		}
 		bw.close();
 
 	}
 	public static void main(String[] args) throws Exception {
-		threadsRunner(50, 4000, 100, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_DIR), new InformationGainBuilder());
+		threadsRunner(5000, 15001, 20, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_DIR), new InformationGainBuilder());
 	}
 
 }
