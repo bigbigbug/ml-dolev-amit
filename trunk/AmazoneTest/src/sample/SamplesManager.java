@@ -295,6 +295,7 @@ public class SamplesManager {
 			double attVals[] = new double[size];
 			int location = 0;
 			for (sample.Attribute nextAtt : s.attributes) {
+				if (nextAtt.attributeNumber>=numAtts) continue;
 				attIndex[location] = nextAtt.attributeNumber; 
 				attVals[location] = nextAtt.value;
 				location++;
