@@ -63,6 +63,7 @@ public class SVMWraper implements Classifier {
 		}
 
 		double foldResults[][] = new double[numFolds][];
+		double foldExpected[][] = new double[numFolds][];
 		// grouping problems and simulating (including params optimization)
 		for (int i = 0; i < folds.length; i++) {
 			svm_problem agrigatetProblem = new svm_problem();
@@ -73,23 +74,23 @@ public class SVMWraper implements Classifier {
 			for (int j = 0; j < folds.length; j++) {
 				if (i == j)
 					continue;
-				agrigatetProblem.l += folds[pos].l;
-				y[pos] = folds[pos].y;
-				x[pos] = folds[pos].x;
+				agrigatetProblem.l += folds[j].l;
+				y[pos] = folds[j].y;
+				x[pos] = folds[j].x;
 				pos++;
 			}
 			agrigatetProblem.y = concatAll(y);
 			agrigatetProblem.x = concatAll(x);
 			foldResults[i] = privateTrainTest(agrigatetProblem, folds[i]); //
+			foldExpected[i] = folds[i].y; //
 		}
 
-		return new Result(trainProb.y, concatAll(foldResults));
+		return new Result(concatAll(foldExpected), concatAll(foldResults));
 	}
 
 	private List<Integer> randPerm(int length, Random rand) {
 		List<Integer> perm = new LinkedList<Integer>();
-		for (int i = 0; i < length; i++)
-			perm.add(i);
+		for (int i = 0; i < length; i++) perm.add(i);
 		java.util.Collections.shuffle(perm, rand);
 		return perm;
 	}
