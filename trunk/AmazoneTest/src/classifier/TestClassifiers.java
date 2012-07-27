@@ -11,15 +11,15 @@ public class TestClassifiers {
 	
 	public static void main(String[] args) throws IOException {
 		
-		ClassifierType type = ClassifierType.SVM_HYPERBOLIC; 	// Accuracy: 0.4766 (train-test), 0.4937 (cross)
-//		ClassifierType type = ClassifierType.SVM_LINEAR;		// Accuracy: 0.7766 (train-test), 0.3788 (cross) 
-//		ClassifierType type = ClassifierType.NAIVE_BAYSE;		// Accuracy: 0.77   (train-test), 0.7477 (cross)
+//		ClassifierType type = ClassifierType.SVM_HYPERBOLIC; 	// Accuracy: 0.753 (train-test), 0.72 (cross)
+//		ClassifierType type = ClassifierType.SVM_LINEAR;		// Accuracy: 0.751 (train-test), 0.713 (cross) 
+		ClassifierType type = ClassifierType.NAIVE_BAYSE;		// Accuracy: 0.658 (train-test), 0.704 (cross)
 		
 		Classifier cls = ClassifierFactory.getClassifier(type, new SamplesManager(),
 				 new File(SamplesManager.DATA_DIR), FeatureSelector.NONE);
 		
-		Result res = cls.trainTest();
-//		Result res = cls.crossValidation(10);
+//		Result res = cls.trainTest();
+		Result res = cls.crossValidation(10);
 		
 		System.err.println("Final Results");
 		System.err.println("Num Samples: " + res.numSamples);
