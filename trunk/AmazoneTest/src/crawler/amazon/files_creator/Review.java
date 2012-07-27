@@ -23,6 +23,11 @@ public class Review {
 	private final String review;
 	public final Classification classification;
 	public final Description description;
+	private boolean useBiGrams = true;
+
+	public void setUseBiGrams(boolean useBiGrams) {
+		this.useBiGrams = useBiGrams;
+	}
 	public Review(String line,Description description) throws ParseException {
 		String[] arr = line.split("\",\"",-1);
 		for (int i = 0;i < arr.length; i++) { 
@@ -32,25 +37,27 @@ public class Review {
 		this.date = dateFormater.parse(arr[DATE_IDX]);
 		rating = Math.round(Float.parseFloat((arr[RATING_IDX])));
 		titleWords = createHistogram(arr[TITLE_IDX],description.stemmedWords,"t_");
+		if (useBiGrams ) titleWords.putAll(getBiGrams(arr[TITLE_IDX], description.stemmedWords,"t_"));
 		reviewWords = createHistogram(arr[REV_IDX],description.stemmedWords,"");
+		if (useBiGrams) reviewWords.putAll(getBiGrams(arr[RATING_IDX], description.stemmedWords,""));
 		if (rating < 3) classification = Classification.AGAINST;
 		else if (rating == 3) classification = Classification.NEUTRAL;
 		else classification = Classification.PRO;
 		this.description = description;
 		this.review = arr[REV_IDX];
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return review.hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Review)) return false;
 		return review.equals(((Review)obj).review);
 	}
-	
+
 	private Map<String, Integer> createHistogram(String string,Set<String> stopWords,String prefix) {
 		Map<String,Integer> histogram = new HashMap<String, Integer>();
 		for (String str : Stemmer.getTerms(string, stopWords)) {
@@ -60,5 +67,18 @@ public class Review {
 		}
 		return histogram;
 	}
-	
+	private Map<? extends String, ? extends Integer> getBiGrams(String string,
+			Set<String> stopWords, String prefix) {
+		Map<String,Integer> histogram = new HashMap<String, Integer>();
+		String prev = null;
+		for (String str : Stemmer.getTerms(string, stopWords)) {
+			if (prev != null) {
+				String s = prefix + prev + "_" + str;
+				Integer x = histogram.get(s);
+				histogram.put(s,(x == null? 1 : x + 1));
+			}
+			prev = str;
+		}
+		return histogram;
+	}
 }
