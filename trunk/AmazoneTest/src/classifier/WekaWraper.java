@@ -1,6 +1,5 @@
 package classifier;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -36,10 +35,18 @@ public class WekaWraper implements Classifier {
 	@Override
 	public Result trainTest() {
 		try {
-			Evaluation eval = new Evaluation(trainDataSet);
 			classifier.buildClassifier(trainDataSet);
+//			int s = testDataSet.size();
+//			double pred[] = new double[s];
+//			double expected[] = new double[s];
+//			for (int i = 0; i < s; i++) {
+//				pred[i] = classifier.classifyInstance(testDataSet.get(i));
+//				expected[i] = testDataSet.get(i).classValue();
+//			}
+			Evaluation eval = new Evaluation(trainDataSet);
 			eval.evaluateModel(classifier, testDataSet);
 			return new Result(eval.confusionMatrix(), eval.correct(), eval.numInstances());
+//			return new Result(expected, pred);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
