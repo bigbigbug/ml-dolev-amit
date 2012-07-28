@@ -8,6 +8,7 @@ import libsvm.svm;
 import libsvm.svm_model;
 import libsvm.svm_node;
 import libsvm.svm_parameter;
+import libsvm.svm_print_interface;
 import libsvm.svm_problem;
 import sample.Attribute;
 import sample.Sample;
@@ -20,9 +21,12 @@ public class SVMWraper implements Classifier {
 	private final svm_problem testProb;
 
 	private int badAtt = 0;
+	
+	private static svm_print_interface svm_print_null = new svm_print_interface() { public void print(String s) {} };
 
 	public SVMWraper(List<Sample> train, List<Sample> test) {
 
+		svm.svm_set_print_string_function(svm_print_null); // Enabling quiet mode
 		if (param.gamma == 0)
 			param.gamma = 0.5;
 
@@ -83,6 +87,7 @@ public class SVMWraper implements Classifier {
 			agrigatetProblem.x = concatAll(x);
 			foldResults[i] = privateTrainTest(agrigatetProblem, folds[i]); //
 			foldExpected[i] = folds[i].y; //
+			System.out.println("fold "+ i);
 		}
 
 		return new Result(concatAll(foldExpected), concatAll(foldResults));
@@ -118,23 +123,23 @@ public class SVMWraper implements Classifier {
 
 	// TODO when performing real tests increase the search
 	private static final int C_MIN_POWER = -3; // -5
-	private static final int C_MAX_POWER = 3; // +5
-	private static final int G_MIN_POWER = -3; // -9
-	private static final int G_MAX_POWER = 3; // 0 not sure
+	private static final int C_MAX_POWER = 5; // +5
+	private static final int G_MIN_POWER = -6; // -9
+	private static final int G_MAX_POWER = 2; // 0 not sure
 	private static final int PARAM_OPTIMIZE_FOLDS = 2;
 
 	private void optimizeParams(svm_problem problem, svm_parameter param) {
-		if (true) { // TODO Run optimization
-			param.C = 1000;
-			param.gamma = 0.01;
-			return;
-		}
+//		if (true) { // TODO Run optimization
+//			param.C = 1000;
+//			param.gamma = 0.01;
+//			return;
+//		}
 		double[] predictions = new double[problem.l];
 		double bestC = 0;
 		double bestG = 0;
 		double bestCacc = 0;
-		for (int c = C_MIN_POWER; c <= C_MAX_POWER; c++) {
-			for (int g = G_MIN_POWER; g <= G_MAX_POWER; g++) {
+		for (int c = C_MIN_POWER; c <= C_MAX_POWER; c = c+2) {
+			for (int g = G_MIN_POWER; g <= G_MAX_POWER; g = g+2) {
 				param.C = Math.pow(10, c);
 				param.gamma = Math.pow(10, g);
 				svm.svm_cross_validation(problem, param, PARAM_OPTIMIZE_FOLDS, predictions);
@@ -143,13 +148,12 @@ public class SVMWraper implements Classifier {
 					bestC = c;
 					bestG = g;
 					bestCacc = accuracy;
+					System.out.println("new Best : (c,g) = (" + c +","+g+")");
 				}
 			}
 		}
-		System.err.println("Best C : " + Math.pow(10, bestC));
-		System.err.println("Best gamma : " + Math.pow(10, bestG));
 		param.C = Math.pow(10, bestC);
-		param.gamma = Math.pow(10, bestC);
+		param.gamma = Math.pow(10, bestG);
 		;
 
 	}
