@@ -148,7 +148,7 @@ public class SVMWraper implements Classifier {
 					bestC = c;
 					bestG = g;
 					bestCacc = accuracy;
-					System.out.println("new Best : (c,g) = (" + c +","+g+")");
+//					System.out.println("new Best : (c,g) = (" + c +","+g+")");
 				}
 			}
 		}
