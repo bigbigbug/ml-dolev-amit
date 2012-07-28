@@ -10,6 +10,12 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import classifier.Classifier;
 import classifier.ClassifierFactory;
@@ -23,77 +29,66 @@ import feature.selection.InformationGainBuilder;
 import feature.selection.SelectorFactory;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_DIR = "experiments/feature_selection";
-	//	
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/info_gain_naive_bayse.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/info_gain_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/info_gain_hyperbolic_svm.txt";
+	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
+	
 	private final SelectorFactory selectorFactory;
 	private final File dir;
 	private final ClassifierType type;
-	private final int numFeaturesFrom;
-	private final int numFeaturesTo;
-	private final int numFeaturesGap;
-	private final BufferedWriter writer;
+	private final ConcurrentMap<Integer,Double> resultsMap;
+	private final BlockingQueue<Integer> queue;
 	public FeatureSelectionThread(SelectorFactory selectorFactory,
 			ClassifierType type, 
 			File dir,
-			int numFeaturesFrom,
-			int numFeaturesTo,
-			int numFeaturesGap,
-			BufferedWriter writer
+			BlockingQueue<Integer> queue,
+			ConcurrentNavigableMap<Integer,Double> resultsMap
 			) { 
 		this.selectorFactory = selectorFactory;
 		this.dir = dir;
 		this.type = type;
-		this.numFeaturesFrom = numFeaturesFrom;
-		this.numFeaturesTo = numFeaturesTo;
-		this.numFeaturesGap = numFeaturesGap;
-		this.writer = writer;
+		this.resultsMap = resultsMap;
+		this.queue = queue;
 	}
 
 	@Override
 	public void run() {
 		super.run();
 		try { 
-			for (int x = numFeaturesFrom; x < numFeaturesTo; x += numFeaturesGap) {
+			while (true) {
+				Integer _numFeatures = queue.poll();
+				if (_numFeatures == null) break;
+				int numFeatures = _numFeatures.intValue();
 				SamplesManager sm = new SamplesManager();
-				FeatureSelector selector = selectorFactory.build(x);
+				FeatureSelector selector = selectorFactory.build(numFeatures);
 				Classifier classifier = ClassifierFactory.getClassifier(type, sm, dir, selector);
 				Result res = classifier.crossValidation(3);
-
-				//TODO: remove and switch to file write
-				writer.write("#features=" + x + " accuracy=" + res.accuracy() + "\n");
+				resultsMap.put(numFeatures, res.accuracy());
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally { 
-			try { 
-				writer.close();
-			} catch (Exception e) { }
 		}
-
 	}
 
 
 	public static void threadsRunner(int numFeaturesFrom, int numFeaturesTo, int numFeaturesGap,
-			int numThreads,	ClassifierType type,File dataDir,File outputDir,SelectorFactory selectorFactory) throws IOException, FileNotFoundException {
-		int totalWork = (numFeaturesTo - numFeaturesFrom) / numFeaturesGap;
-		totalWork += 1;
-		int work = totalWork / numThreads;
-		work *= numFeaturesGap;
-		System.out.println(work);
+			int numThreads,	ClassifierType type,File dataDir,File resFile,SelectorFactory selectorFactory) throws IOException, FileNotFoundException {
+		BlockingQueue<Integer> queue = new LinkedBlockingQueue<Integer>();
+		//fill the work queue:
+		for (int i = numFeaturesFrom; i <= numFeaturesTo; i += numFeaturesGap)
+			queue.add(i);
+		//the map that will hold the results:
+		ConcurrentNavigableMap<Integer, Double> map = new ConcurrentSkipListMap<Integer, Double>();
+		//the threads list, needed for later join
 		FeatureSelectionThread[] threads = new FeatureSelectionThread[numThreads];
-		if (outputDir.isDirectory() == false) outputDir.mkdirs();
+		//start all threads:
 		for (int i = 0; i < numThreads; i++) { 
-			String fileName = "_tmp_" + i;
-			File file = new File(outputDir,fileName);
-			if (file.exists()) file.delete();
-			file.createNewFile();
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			threads[i] = new FeatureSelectionThread(selectorFactory, type, dataDir, numFeaturesFrom + i*work, 
-					(i==numThreads-1 ? numFeaturesTo : numFeaturesFrom + work*(i+1))
-					, numFeaturesGap,bw);
+			threads[i] = new FeatureSelectionThread(selectorFactory, type, dataDir, queue, map);
 			threads[i].start();
 		}
+		//wait for all threads to finish
 		for (Thread t : threads) {
 			try {
 				t.join();
@@ -101,35 +96,25 @@ public class FeatureSelectionThread extends Thread {
 				e.printStackTrace();
 			}
 		}
-		File[] files = outputDir.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File arg0, String arg1) {
-				return arg1.startsWith("_tmp_");
-			}
-		});
-		Arrays.sort(files, new Comparator<File>() {
-			@Override
-			public int compare(File f1, File f2) {
-				return new Integer(f1.getName().split("_")[2]).compareTo(new Integer(f2.getName().split("_")[2]));
-			}
-		});
-		File resFile = new File(outputDir,"accuracy_results.txt");
+
 		if (resFile.exists()) resFile.delete();
 		resFile.createNewFile();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(resFile));
-		for (File file : files) { 
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			String line = null;
-			while ((line = br.readLine()) != null) {
-				bw.write(line + "\n");
-			}
-			file.delete();
+		for (Entry<Integer, Double> entry : map.entrySet()) { 
+			bw.write("#features=" + entry.getKey() + " accuracy=" + entry.getValue() + "\n");
 		}
 		bw.close();
 
 	}
 	public static void main(String[] args) throws Exception {
-		threadsRunner(5000, 15001, 20, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_DIR), new InformationGainBuilder());
+		File dir = new File(RESULTS_DIR_NAME);
+		if (!dir.isDirectory()) dir.mkdirs();
+		//1:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_HYPERBOLIC, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC), new InformationGainBuilder());
+		//2:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR), new InformationGainBuilder());
+		//3:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.NAIVE_BAYSE, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE), new InformationGainBuilder());
 	}
 
 }
