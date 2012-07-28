@@ -26,6 +26,7 @@ import weka.core.SparseInstance;
 import crawler.amazon.files_creator.DataFilesCreator;
 import feature.selection.FeatureSelector;
 import feature.selection.GeneticCFSFeatureSelector;
+import feature.selection.InformationGainBuilder;
 import feature.selection.InformationGainFeatureSelector;
 import feature.selection.PCASelector;
 
@@ -40,7 +41,6 @@ public class SamplesManager {
 	private static final String DATA_FILE_NAME = "train.data";
 	private static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
 	private static final String TEST_DATA_FILE_NAME = "test.data";
-	private static SamplesManager INSTANCE;
 	private Map<Integer,Integer> idfMap;
 	public SamplesManager() {
 		idfMap = new HashMap<Integer, Integer>();
@@ -309,46 +309,15 @@ public class SamplesManager {
 
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new PCASelector(2));
-
-		//		Instances temp = asWekaInstances(l);
-		//		Instance inst = temp.iterator().next();
-		//		System.out.println(inst.numValues());
-		//		for (int i = 0 ; i < inst.numValues(); i++) { 
-		//			if (inst.index(i) == inst.classIndex()) continue;
-		//			System.out.println(inst.index(i));
-		//			System.out.println(inst.value(inst.index(i)));
-		//		}
-		//		System.out.println(inst.classIndex());
-		//		System.out.println(inst.classValue());
-
-
-		l = asSamplesList(asWekaInstances(l));
-		int minClass = 1000;
-		int maxClass = -1;
-		for (Sample s : l) { 
-			minClass = Math.min(minClass,s.classification);
-			maxClass = Math.max(maxClass, s.classification);
-		}
-		System.out.println(minClass);
-		System.out.println(maxClass);
-
-		System.out.println(l.size());
-		System.out.println("");
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new InformationGainBuilder().build(500));
+		l = sm.parseTestData();
 		NavigableSet<Integer> set = new TreeSet<Integer>();
-		for (Sample sample : l) {
-			for (Attribute att : sample.attributes) {
-				set.add(att.attributeNumber);
+		for (Sample s : l) { 
+			for (Attribute a : s.attributes) {
+				set.add(a.attributeNumber);
 			}
-
 		}
-
 		System.out.println(set.size());
-		System.out.println(set.last());
-		System.out.println("");
-		for (int x = 0; x <= set.last() ; x++) {
-			if (!set.contains(x)) System.out.println(x);
-		}
 	}
 
 }
