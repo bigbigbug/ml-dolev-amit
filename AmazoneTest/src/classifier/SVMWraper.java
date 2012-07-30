@@ -1,8 +1,11 @@
 package classifier;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+
+import experiments.PresisionTest;
 
 import libsvm.svm;
 import libsvm.svm_model;
@@ -70,6 +73,7 @@ public class SVMWraper implements Classifier {
 		double foldExpected[][] = new double[numFolds][];
 		// grouping problems and simulating (including params optimization)
 		for (int i = 0; i < folds.length; i++) {
+			System.out.println("fold "+ (i+1));
 			svm_problem agrigatetProblem = new svm_problem();
 			agrigatetProblem.l = 0;
 			double y[][] = new double[numFolds - 1][];
@@ -85,9 +89,8 @@ public class SVMWraper implements Classifier {
 			}
 			agrigatetProblem.y = concatAll(y);
 			agrigatetProblem.x = concatAll(x);
-			foldResults[i] = privateTrainTest(agrigatetProblem, folds[i]); //
+			foldResults[i] = privateTrainTest(agrigatetProblem, folds[i]);
 			foldExpected[i] = folds[i].y; //
-			System.out.println("fold "+ i);
 		}
 
 		return new Result(concatAll(foldExpected), concatAll(foldResults));
@@ -116,7 +119,13 @@ public class SVMWraper implements Classifier {
 		double[] predictions = new double[test.l];
 		svm_model model = svm.svm_train(train, param);
 		for (int i = 0; i < test.l; i++) {
-			predictions[i] = svm.svm_predict(model, test.x[i]);
+			if ( param.probability == 1 ) {
+				svm.svm_predict_probability(model, test.x[i], prob[i]);
+				cls[i] = test.y[i];
+				predictions[i] = 1;
+			} else {
+				predictions[i] = svm.svm_predict(model, test.x[i]);
+			}
 		}
 		return predictions;
 	}
@@ -238,5 +247,17 @@ public class SVMWraper implements Classifier {
 			offset += array.length;
 		}
 		return result;
+	}
+	
+	private double prob[][];
+	private double[] cls;
+	public PresisionTest confidance() {
+		System.err.println("start");
+		param.probability = 1;
+		prob = new double[testProb.l][3];
+		cls = new double[testProb.l];
+		crossValidation(10);
+		param.probability = 0;
+		return new PresisionTest(prob, cls);
 	}
 }
