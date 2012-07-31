@@ -1,11 +1,8 @@
 package classifier;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-
-import experiments.PresisionTest;
 
 import libsvm.svm;
 import libsvm.svm_model;
@@ -15,6 +12,7 @@ import libsvm.svm_print_interface;
 import libsvm.svm_problem;
 import sample.Attribute;
 import sample.Sample;
+import experiments.PresisionTest;
 
 public class SVMWraper implements Classifier {
 
@@ -251,12 +249,12 @@ public class SVMWraper implements Classifier {
 	
 	private double prob[][];
 	private double[] cls;
-	public PresisionTest confidance() {
+	public PresisionTest confidance(int folds) {
 		System.err.println("start");
 		param.probability = 1;
-		prob = new double[testProb.l][3];
-		cls = new double[testProb.l];
-		crossValidation(10);
+		prob = new double[trainProb.l][3];
+		cls = new double[trainProb.l];
+		crossValidation(folds);
 		param.probability = 0;
 		return new PresisionTest(prob, cls);
 	}
