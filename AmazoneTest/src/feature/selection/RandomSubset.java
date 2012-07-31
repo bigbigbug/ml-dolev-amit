@@ -33,8 +33,8 @@ public class RandomSubset {
 		double probs[] = new double[valids.length];
 		double sum = 0;
 		for (int i = 0; i < probs.length; i++) {
-			probs[i] = scores[valids[i]]+EPSILON;
-			sum+=scores[valids[i]]+EPSILON;
+			probs[i] = -Math.log(scores[valids[i]]+EPSILON);
+			sum+=probs[i];
 		}
 		probs[0] = probs[0]/sum;
 		for (int i = 1; i < probs.length; i++) {
@@ -42,14 +42,14 @@ public class RandomSubset {
 		}
 		for (int i = 0; i < probs.length; i++) {
 			AttScore atts = new AttScore();
-			atts.attId = i;
+			atts.attId = valids[i];
 			atts.position = probs[i];
 			newAtts.add(atts);
 		}
 		attLeft = newAtts;
 	}
 	
-	public Integer[][] getSubsets(int numSubsets, int subsetSize) {
+	public int[][] getSubsets(int numSubsets, int subsetSize) {
 		Integer[][] retVal = new Integer[numSubsets][];
 		
 		if (subsetSize > attLeft.size()) {
@@ -61,8 +61,14 @@ public class RandomSubset {
 			retVal[i] = getStohasticSubset(subsetSize);
 			Arrays.sort(retVal[i]);
 		}
+		int[][] res = new int[numSubsets][subsetSize];
+		for (int i = 0; i < res.length; i++) {
+			for (int j = 0; j < res[i].length; j++) {
+				res[i][j] = retVal[i][j];
+			}
+		}
 		
-		return retVal;
+		return res;
 	}
 
 	private Integer[] getStohasticSubset(int numCandidates) {
@@ -87,7 +93,7 @@ public class RandomSubset {
 		for (int i = 0; i < valids.length; i++) {
 			valids[i] = 3*i;
 		}
-		Integer[][] res = rs.getSubsets(5, 20);
+		int[][] res = rs.getSubsets(5, 20);
 		for (int i = 0; i < res.length; i++) {
 			System.out.println(Arrays.toString(res[i]));
 		}
