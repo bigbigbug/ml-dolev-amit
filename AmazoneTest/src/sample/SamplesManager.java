@@ -307,10 +307,25 @@ public class SamplesManager {
 		return data;
 	}
 
+	public static int[] listAttributes(List<Sample> samples) {
+		NavigableSet<Integer> set = new TreeSet<Integer>();
+		for (Sample s : samples) { 
+			for (Attribute att : s.attributes) {
+				set.add(att.attributeNumber);
+			}
+		}
+		int[] arr = new int[set.size()];
+		int i = 0;
+		for (Integer x : set) { 
+			arr[i++] = x.intValue();
+		}
+		return arr;
+	}
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new InformationGainBuilder().build(500));
-		l = sm.parseTestData();
+		long start = System.currentTimeMillis();
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new PCASelector(100));
+		System.out.println(((double)System.currentTimeMillis()-start)/60000);
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : l) { 
 			for (Attribute a : s.attributes) {
