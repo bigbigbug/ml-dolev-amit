@@ -17,14 +17,17 @@ import classifier.Classifier;
 import classifier.ClassifierFactory;
 import classifier.ClassifierFactory.ClassifierType;
 import classifier.Result;
+import feature.selection.DFSelectorBuilder;
+import feature.selection.DoubleSelectorBuilder;
 import feature.selection.FeatureSelector;
+import feature.selection.PCABuilder;
 import feature.selection.ReliefFBuilder;
 import feature.selection.SelectorFactory;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/ReliefF_naive_bayse.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/ReliefF_linear_svm.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/ReliefF_hyperbolic_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/double_df_naive_bayse.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/double_df_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/double_df_hyperbolic_svm.txt";
 	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
 	
 	private final SelectorFactory selectorFactory;
@@ -95,6 +98,7 @@ public class FeatureSelectionThread extends Thread {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(resFile));
 		for (Entry<Integer, Double> entry : map.entrySet()) { 
 			bw.write("#features=" + entry.getKey() + " accuracy=" + entry.getValue() + "\n");
+			System.out.println("#features=" + entry.getKey() + " accuracy=" + entry.getValue() + "\n");
 		}
 		bw.close();
 
@@ -103,11 +107,11 @@ public class FeatureSelectionThread extends Thread {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
 		//1:
-		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_HYPERBOLIC, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC), new ReliefFBuilder());
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_HYPERBOLIC, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC), new DoubleSelectorBuilder(new DFSelectorBuilder(), new PCABuilder()));
 		//2:
-//		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR), new ReliefFBuilder());
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR), new DoubleSelectorBuilder(new DFSelectorBuilder(), new PCABuilder()));
 		//3:
-		threadsRunner(120, 12000, 120, 2, ClassifierType.NAIVE_BAYSE, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE), new ReliefFBuilder());
+		threadsRunner(120, 12000, 120, 2, ClassifierType.NAIVE_BAYSE, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE), new DoubleSelectorBuilder(new DFSelectorBuilder(), new PCABuilder()) );
 	}
 
 }
