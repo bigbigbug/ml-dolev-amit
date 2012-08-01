@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 
 import sample.SamplesManager;
 import classifier.Classifier;
@@ -39,6 +40,8 @@ public class PresisionTest {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(resFile));
 		
 		PresisionTest res = ((SVMWraper)cls).confidance(10);
+		double paramOptMat[][] = ((SVMWraper)cls).getLastOptMat();
+		
 		
 		for (int id = 1; id <= 3; id++){
 			StringBuilder precision = new StringBuilder();
@@ -61,6 +64,10 @@ public class PresisionTest {
 			System.out.println(recall);
 			bw.write(precision.toString());
 			bw.write(recall.toString());
+		}
+		bw.write("\noptimization search matrix\n");
+		for (double[] ds : paramOptMat) {
+			bw.write("\n"+Arrays.toString(ds));
 		}
 		bw.close();
 	}

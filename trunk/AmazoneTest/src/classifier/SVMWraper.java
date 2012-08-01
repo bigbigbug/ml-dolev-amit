@@ -129,40 +129,53 @@ public class SVMWraper implements Classifier {
 	}
 
 	// TODO when performing real tests increase the search
-	private static final int C_MIN_POWER = -3; // -5
-	private static final int C_MAX_POWER = 5; // +5
-	private static final int G_MIN_POWER = -6; // -9
-	private static final int G_MAX_POWER = 2; // 0 not sure
+	private static final int C_MIN_POWER = -5; // -5
+	private static final int C_MAX_POWER = 15; // +5
+	private static final int G_MIN_POWER = -15; // -9
+	private static final int G_MAX_POWER = 3; // 0 not sure
 	private static final int PARAM_OPTIMIZE_FOLDS = 2;
+	private static final int PARAM_OPTIMIZE_POW = 2;
+	
+	enum ParamOptimizationLevel {
+		NONE, LOW, FULL;
+	} 
+	private ParamOptimizationLevel pol = ParamOptimizationLevel.LOW;
 
+	
 	private void optimizeParams(svm_problem problem, svm_parameter param) {
-//		if (true) { // TODO Run optimization
-//			param.C = 1000;
-//			param.gamma = 0.01;
-//			return;
-//		}
 		double[] predictions = new double[problem.l];
 		double bestC = 0;
 		double bestG = 0;
-		double bestCacc = 0;
-		for (int c = C_MIN_POWER; c <= C_MAX_POWER; c = c+2) {
-			for (int g = G_MIN_POWER; g <= G_MAX_POWER; g = g+2) {
-				param.C = Math.pow(10, c);
-				param.gamma = Math.pow(10, g);
+		int gFinish = G_MAX_POWER;
+		int gap = 2;
+		double bestAcc = 0;
+		if (pol.equals(ParamOptimizationLevel.NONE)) {
+			param.C = 1;
+			param.gamma = 0.01;
+			return;
+		} else if (pol.equals(ParamOptimizationLevel.LOW)) {
+			gap = 3;
+		} 
+		if (param.kernel_type == svm_parameter.LINEAR) {
+			gFinish = G_MIN_POWER;
+		}
+		optimisationMatrix = new double[(C_MAX_POWER-C_MIN_POWER)/gap+1][(gFinish-G_MIN_POWER)/gap+1];
+		for (int c = C_MIN_POWER; c <= C_MAX_POWER; c += gap) {
+			for (int g = G_MIN_POWER; g <= gFinish; g += gap) {
+				param.C = Math.pow(PARAM_OPTIMIZE_POW, c);
+				param.gamma = Math.pow(PARAM_OPTIMIZE_POW, g);
 				svm.svm_cross_validation(problem, param, PARAM_OPTIMIZE_FOLDS, predictions);
 				double accuracy = (new Result(problem.y, predictions)).accuracy();
-				if (accuracy > bestCacc) {
+				if (accuracy > bestAcc) {
 					bestC = c;
 					bestG = g;
-					bestCacc = accuracy;
-//					System.out.println("new Best : (c,g) = (" + c +","+g+")");
+					bestAcc = accuracy;
 				}
+				optimisationMatrix[(c-C_MIN_POWER)/gap][(g-G_MIN_POWER)/gap] = accuracy;
 			}
 		}
-		param.C = Math.pow(10, bestC);
-		param.gamma = Math.pow(10, bestG);
-		;
-
+		param.C = Math.pow(PARAM_OPTIMIZE_POW, bestC);
+		param.gamma = Math.pow(PARAM_OPTIMIZE_POW, bestG);
 	}
 
 	private svm_problem createSVMProb(List<Sample> samples) {
@@ -218,7 +231,6 @@ public class SVMWraper implements Classifier {
 		param.kernel_type = svm_parameter.LINEAR;
 	}
 
-	// TODO check moving to generic
 	private double[] concatAll(double[][] toMerge) {
 		int totalLength = 0;
 		for (double[] array : toMerge) {
@@ -249,6 +261,8 @@ public class SVMWraper implements Classifier {
 	
 	private double prob[][];
 	private double[] cls;
+	private double optimisationMatrix[][] = null;
+	
 	public PresisionTest confidance(int folds) {
 		System.err.println("start");
 		param.probability = 1;
@@ -257,5 +271,10 @@ public class SVMWraper implements Classifier {
 		crossValidation(folds);
 		param.probability = 0;
 		return new PresisionTest(prob, cls);
+	}
+
+	public double[][] getLastOptMat() {
+		if (optimisationMatrix == null) throw new RuntimeException("Must incoke clasification first");
+		return optimisationMatrix;
 	}
 }
