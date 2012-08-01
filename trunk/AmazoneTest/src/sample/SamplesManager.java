@@ -263,7 +263,7 @@ public class SamplesManager {
 				if (curr.index(i) == curr.classIndex()) continue;
 				int idx = curr.index(i);
 				double value = curr.value(curr.index(i));
-				Attribute attribute = new Attribute(idx,value);
+				Attribute attribute = new Attribute(Integer.parseInt(curr.attribute(idx).name()),value);
 				attributes.add(attribute);
 			}
 			samples.add(new Sample(attributes,(int)Math.round(curr.classValue())+1));
@@ -327,7 +327,7 @@ public class SamplesManager {
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
 		long start = System.currentTimeMillis();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new DFSelectorBuilder(), new PCABuilder(),100));
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new InformationGainBuilder(), new PCABuilder(),100));
 		System.out.println(((double)System.currentTimeMillis()-start)/60000);
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : l) { 
