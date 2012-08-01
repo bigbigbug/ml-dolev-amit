@@ -1,25 +1,16 @@
 package feature.selection;
 
-import java.io.BufferedWriter;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import cern.colt.Arrays;
-
 import sample.Sample;
 import sample.SamplesManager;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.AttributeEvaluator;
-import weka.attributeSelection.InfoGainAttributeEval;
-import weka.attributeSelection.SubsetEvaluator;
 import weka.classifiers.Evaluation;
-import weka.classifiers.meta.RandomSubSpace;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.filters.unsupervised.attribute.Reorder;
 
 public class StochasticBestFirstStep  {
 	private final double[] scores;
