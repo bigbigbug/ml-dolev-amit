@@ -277,39 +277,43 @@ public class SamplesManager {
 			for (Attribute att : s.attributes)
 				attributes.add(att.attributeNumber);
 		
-		int numAtts = attributes.size();
-		ArrayList<weka.core.Attribute> atts = new ArrayList<weka.core.Attribute>();
-		for (int i = 0; i < numAtts; i++) {
-			atts.add(i,new weka.core.Attribute(Integer.toString(i)));
+		Map<Integer,Integer> id2ind = new HashMap<Integer, Integer>();
+		ArrayList<weka.core.Attribute> instancesAtt = new ArrayList<weka.core.Attribute>();
+		Integer j = 0;
+		for (Integer i : attributes) {
+			weka.core.Attribute newAtt = new weka.core.Attribute(i.toString());
+			id2ind.put(i, j);
+			instancesAtt.add(j++,newAtt);
+			
 		}
 		List<String> labels = new LinkedList<String>();
 		labels.add("1");
 		labels.add("2");
 		labels.add("3");
 
-		atts.add(numAtts,new weka.core.Attribute("class",labels));
+		instancesAtt.add(j, new weka.core.Attribute("class",labels));
 
-		Instances data = new Instances("trainData", atts, samples.size());
+		Instances data = new Instances("trainData", instancesAtt, samples.size());
 
-		data.setClass(atts.get(numAtts));
+		data.setClass(instancesAtt.get(j));
 		for (Sample s : samples) {
 			int size = s.attributes.size()+1;
 			int attIndex[] = new int[size]; 
 			double attVals[] = new double[size];
 			int location = 0;
-			for (sample.Attribute nextAtt : s.attributes) {
-				if (nextAtt.attributeNumber>=numAtts) continue;
-				attIndex[location] = nextAtt.attributeNumber; 
+			for (Attribute nextAtt : s.attributes) {
+				Integer newIndex = id2ind.get(nextAtt.attributeNumber);
+				if (newIndex == null) continue;
+				attIndex[location] = newIndex; 
 				attVals[location] = nextAtt.value;
 				location++;
 			}
-			attIndex[location] = numAtts; 
+			attIndex[location] = j; 
 			attVals[location] = s.classification-1;
 			data.add(new SparseInstance(1.0, attVals, attIndex, size));
 		}
 		return data;
 	}
-
 	public static int[] listAttributes(List<Sample> samples) {
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : samples) { 
