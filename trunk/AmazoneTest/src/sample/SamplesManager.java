@@ -24,6 +24,7 @@ import weka.core.SparseInstance;
 
 
 import crawler.amazon.files_creator.DataFilesCreator;
+import feature.selection.DFSelector;
 import feature.selection.DFSelectorBuilder;
 import feature.selection.DoubleFeatureSelector;
 import feature.selection.FeatureSelector;
@@ -254,6 +255,10 @@ public class SamplesManager {
 	}
 	
 	public static List<Sample> asSamplesList(Instances instances) {
+		return asSamplesList(instances,true);
+	}
+	
+	public static List<Sample> asSamplesList(Instances instances, boolean b) {
 		List<Sample> samples = new ArrayList<Sample>();
 		Iterator<Instance> iter = instances.iterator();
 		while (iter.hasNext()) {
@@ -263,13 +268,15 @@ public class SamplesManager {
 				if (curr.index(i) == curr.classIndex()) continue;
 				int idx = curr.index(i);
 				double value = curr.value(curr.index(i));
-				Attribute attribute = new Attribute(Integer.parseInt(curr.attribute(idx).name()),value);
+				Attribute attribute = new Attribute(
+						b?Integer.parseInt(curr.attribute(idx).name()):idx,value);
 				attributes.add(attribute);
 			}
 			samples.add(new Sample(attributes,(int)Math.round(curr.classValue())+1));
 		}
 		return samples;
 	}
+	
 	public static Instances asWekaInstances(List<Sample> samples) {
 
 		Set<Integer> attributes = new HashSet<Integer>();
@@ -331,7 +338,7 @@ public class SamplesManager {
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
 		long start = System.currentTimeMillis();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new InformationGainBuilder(), new PCABuilder(),100));
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new DFSelectorBuilder(), new PCABuilder(), 100));
 		System.out.println(((double)System.currentTimeMillis()-start)/60000);
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : l) { 
@@ -341,5 +348,6 @@ public class SamplesManager {
 		}
 		System.out.println(set.size());
 	}
+
 
 }
