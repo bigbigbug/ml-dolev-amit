@@ -2,6 +2,7 @@ package feature.selection;
 
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeSet;
 
 import sample.Attribute;
@@ -9,7 +10,7 @@ import sample.Sample;
 import sample.SamplesManager;
 
 public class DoubleFeatureSelector implements FeatureSelector {
-	public static final int GROUP_SIZE = 1000;
+	public static final int GROUP_SIZE = 500;
 	private final SelectorFactory firstBuilder, secondBuilder;
 	private final int numFeatures;
 	private int[] attributes;
@@ -35,6 +36,8 @@ public class DoubleFeatureSelector implements FeatureSelector {
 			firstGroups = new TreeSet<Integer>();
 		}
 		samples = firstBuilder.build(GROUP_SIZE).selectFeatresFromTrain(samples);
+		Set<Integer> temp = getAttributes(samples);
+		System.out.println(temp.size());
 		samples = secondBuilder.build(numFeatures - n).selectFeatresFromTrain(samples);
 		firstGroups.addAll(getAttributes(samples));
 		attributes = asPrimitiveArray(firstGroups);
