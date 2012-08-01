@@ -44,7 +44,7 @@ public class DFSelector implements FeatureSelector {
 		
 		if (validFeatures == null) {
 			ArrayList<Feature> dfArr = new ArrayList<Feature>();
-			int size = 12049;
+			int size = 12050;
 			extendFeaturesArr(dfArr, size);
 			
 			for (Sample sample : trainSet) {
@@ -66,7 +66,7 @@ public class DFSelector implements FeatureSelector {
 	}
 
 	private void extendFeaturesArr(ArrayList<Feature> dfArr, int upTo) {
-		for (int i = dfArr.size(); i < upTo; i++) {
+		for (int i = dfArr.size(); i <= upTo; i++) {
 			dfArr.add(i, new Feature(i));
 		}
 	}
