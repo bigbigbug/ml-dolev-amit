@@ -37,7 +37,7 @@ public class DoubleFeatureSelector implements FeatureSelector {
 		}
 		samples = firstBuilder.build(GROUP_SIZE).selectFeatresFromTrain(samples);
 		Set<Integer> temp = getAttributes(samples);
-		System.out.println(temp.size());
+//		System.out.println(temp.size());
 		samples = secondBuilder.build(numFeatures - n).selectFeatresFromTrain(samples);
 		firstGroups.addAll(getAttributes(samples));
 		attributes = asPrimitiveArray(firstGroups);

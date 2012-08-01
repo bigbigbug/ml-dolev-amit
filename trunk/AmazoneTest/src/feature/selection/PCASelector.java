@@ -29,7 +29,8 @@ public class PCASelector implements FeatureSelector {
 		selection.setSearch(ranker);
 		try { 
 			selection.SelectAttributes(instances);
-			return SamplesManager.asSamplesList(selection.reduceDimensionality(instances));
+			instances = selection.reduceDimensionality(instances);
+			return SamplesManager.asSamplesList(instances,false);
 		} catch (Exception e ) {
 			e.printStackTrace();
 			return null;
