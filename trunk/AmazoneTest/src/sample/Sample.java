@@ -15,7 +15,7 @@ public class Sample {
 	 */
 	public final int classification;
 	
-	Sample(List<Attribute> attributes, int classification) {
+	public Sample(List<Attribute> attributes, int classification) {
 		this.classification = classification;
 		this.attributes = attributes;
 		Collections.sort(this.attributes);
