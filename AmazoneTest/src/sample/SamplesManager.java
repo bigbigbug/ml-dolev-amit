@@ -24,10 +24,13 @@ import weka.core.SparseInstance;
 
 
 import crawler.amazon.files_creator.DataFilesCreator;
+import feature.selection.DFSelectorBuilder;
+import feature.selection.DoubleFeatureSelector;
 import feature.selection.FeatureSelector;
 import feature.selection.GeneticCFSFeatureSelector;
 import feature.selection.InformationGainBuilder;
 import feature.selection.InformationGainFeatureSelector;
+import feature.selection.PCABuilder;
 import feature.selection.PCASelector;
 
 public class SamplesManager {
@@ -37,10 +40,10 @@ public class SamplesManager {
 	private static final int DATA_DOC_IDX = 0;
 	private static final int DATA_WORD_IDX = 1;
 	private static final int DATA_COUNT_IDX = 2;
-	private static final String CLASSIFICATION_FILE_NAME = "train.label";
-	private static final String DATA_FILE_NAME = "train.data";
-	private static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
-	private static final String TEST_DATA_FILE_NAME = "test.data";
+	public static final String CLASSIFICATION_FILE_NAME = "train.label";
+	public static final String DATA_FILE_NAME = "train.data";
+	public static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
+	public static final String TEST_DATA_FILE_NAME = "test.data";
 	private Map<Integer,Integer> idfMap;
 	public SamplesManager() {
 		idfMap = new HashMap<Integer, Integer>();
@@ -324,7 +327,7 @@ public class SamplesManager {
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
 		long start = System.currentTimeMillis();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new PCASelector(100));
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new DFSelectorBuilder(), new PCABuilder(),100));
 		System.out.println(((double)System.currentTimeMillis()-start)/60000);
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : l) { 
