@@ -17,12 +17,13 @@ import classifier.Classifier;
 import classifier.ClassifierFactory;
 import classifier.ClassifierFactory.ClassifierType;
 import classifier.Result;
-import feature.selection.DFSelectorBuilder;
-import feature.selection.DoubleSelectorBuilder;
 import feature.selection.FeatureSelector;
-import feature.selection.PCABuilder;
-import feature.selection.ReliefFBuilder;
+import feature.selection.InformationGainBuilder;
 import feature.selection.SelectorFactory;
+import feature.selection.SymmetricalUncertBuilder;
+import feature.selection.PCASelectors.DFSelectorBuilder;
+import feature.selection.PCASelectors.DoubleSelectorBuilder;
+import feature.selection.PCASelectors.PCABuilder;
 
 public class FeatureSelectionThread extends Thread {
 	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/double_df_naive_bayse.txt";
@@ -104,6 +105,32 @@ public class FeatureSelectionThread extends Thread {
 
 	}
 	public static void main(String[] args) throws Exception {
+//		runIG();
+//		runSU();
+		runDFPCA();
+	}
+
+	private static void runIG() throws IOException, FileNotFoundException {
+		File dir = new File(RESULTS_DIR_NAME);
+		if (!dir.isDirectory()) dir.mkdirs();
+		//1:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_HYPERBOLIC, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC), new InformationGainBuilder());
+		//2:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR), new InformationGainBuilder());
+		//3:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.NAIVE_BAYSE, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE), new InformationGainBuilder());
+	}
+	private static void runSU() throws IOException, FileNotFoundException {
+		File dir = new File(RESULTS_DIR_NAME);
+		if (!dir.isDirectory()) dir.mkdirs();
+		//1:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_HYPERBOLIC, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC), new SymmetricalUncertBuilder());
+		//2:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.SVM_LINEAR, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR), new SymmetricalUncertBuilder());
+		//3:
+		threadsRunner(120, 12000, 120, 2, ClassifierType.NAIVE_BAYSE, new File(SamplesManager.DATA_DIR), new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE), new SymmetricalUncertBuilder());
+	}
+	private static void runDFPCA() throws IOException, FileNotFoundException {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
 		//1:
