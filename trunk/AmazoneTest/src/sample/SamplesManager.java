@@ -32,6 +32,7 @@ import feature.selection.PCASelectors.DFSelectorBuilder;
 import feature.selection.PCASelectors.DoubleFeatureSelector;
 import feature.selection.PCASelectors.PCABuilder;
 import feature.selection.PCASelectors.PCASelector;
+import feature.selection.PCASelectors.RestrictedPCASelector;
 import feature.selection.notUsed.GeneticCFSFeatureSelector;
 
 public class SamplesManager {
@@ -360,7 +361,7 @@ public class SamplesManager {
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
 		long start = System.currentTimeMillis();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new DFSelectorBuilder(), new PCABuilder(), 2100));
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new RestrictedPCASelector(200));
 		System.out.println(((double)System.currentTimeMillis()-start)/60000);
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : l) { 
