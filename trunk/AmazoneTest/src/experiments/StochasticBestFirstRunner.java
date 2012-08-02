@@ -30,6 +30,7 @@ public class StochasticBestFirstRunner {
 		do { 
 			atts = sbf.step(numSubSets, gap, numThreads, builder);
 			Instances instances = SamplesManager.asWekaInstances(SamplesManager.reduceDimensions(samples, atts));
+			
 			Evaluation eval = new Evaluation(instances);
 			eval.crossValidateModel(builder.build(), instances, 3, new Random(11));
 			writer.write("#features=" + atts.length + " accuracy=" + eval.pctCorrect() + "\n");

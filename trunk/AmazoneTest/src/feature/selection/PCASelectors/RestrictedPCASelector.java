@@ -14,13 +14,13 @@ import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
 import feature.selection.FeatureSelector;
 
 public class RestrictedPCASelector implements FeatureSelector {
 
-	private static final double VAR = 0.95;
+//	private static final double VAR_jump = 0.95;
+	
+	private final double var;
 	
 	private  Map<Integer,Double> max;
 	private  Map<Integer,Double> min;
@@ -29,7 +29,7 @@ public class RestrictedPCASelector implements FeatureSelector {
 	private AttributeSelection selection;
 	private int[] firstAttributes;
 	private int[] candidates;
-	public final int GROUP_SIZE = 1000;
+	public final int GROUP_SIZE = 2000;
 	private final int numFeatures;
 	
 	public Map<Integer, Integer> createAttributeHistogram(List<Sample> samples) { 
@@ -43,13 +43,15 @@ public class RestrictedPCASelector implements FeatureSelector {
 		}
 		return res;
 	}
+	private static final double[] VAR_VALS = {0.15,0.55,0.75,0.97,1.0};
 	public RestrictedPCASelector(int numFeatures) {
 		this.numFeatures = numFeatures;
+		this.var = VAR_VALS[numFeatures%GROUP_SIZE / 400];
 	}
 	
 	@Override
 	public List<Sample> selectFeatresFromTrain(List<Sample> trainSet) {
-		final Map<Integer,Integer> hist =createAttributeHistogram(trainSet);
+		final Map<Integer,Integer> hist = createAttributeHistogram(trainSet);
 		int n = (numFeatures/GROUP_SIZE) * GROUP_SIZE;
 		Integer[] arr = hist.keySet().toArray(new Integer[0]);
 		Arrays.sort(arr,new Comparator<Integer>() {
@@ -64,18 +66,14 @@ public class RestrictedPCASelector implements FeatureSelector {
 		candidates = toPrimitive(Arrays.copyOfRange(arr, n, n+GROUP_SIZE));
 		List<Sample> reducedSamples = SamplesManager.reduceDimensions(trainSet, candidates);
 		PrincipalComponents pca = new PrincipalComponents();
-		pca.setVarianceCovered(VAR);
+		pca.setVarianceCovered(var);
 		Ranker ranker = new Ranker();
-//		ranker.setNumToSelect(numFeatures);
 		selection = new AttributeSelection();
 		selection.setEvaluator(pca);
 		selection.setSearch(ranker);
 		try { 
 			Instances wekaInstances = SamplesManager.asWekaInstances(reducedSamples);
 			selection.SelectAttributes(wekaInstances);
-//			normalizer = new Normalize();
-//			normalizer.setInputFormat(wekaInstances);
-//			wekaInstances = Filter.useFilter(wekaInstances, normalizer);			
 			wekaInstances = selection.reduceDimensionality(wekaInstances);
 			reducedSamples = SamplesManager.asSamplesList(wekaInstances,false);
 		} catch (Exception e) { 
@@ -173,6 +171,12 @@ public class RestrictedPCASelector implements FeatureSelector {
 			e.printStackTrace();
 			return 0;
 		}
+	}
+	
+	// test
+	public static void main(String[] args) {
+		
+		for (int i = 400; 12000 > i; i+=400) System.out.println(new RestrictedPCASelector(i).var);
 	}
 
 }

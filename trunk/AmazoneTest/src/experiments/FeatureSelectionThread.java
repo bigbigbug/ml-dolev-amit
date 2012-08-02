@@ -6,31 +6,38 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import sample.Sample;
 import sample.SamplesManager;
+import weka.attributeSelection.InfoGainAttributeEval;
 import classifier.Classifier;
 import classifier.ClassifierFactory;
+import classifier.SVMWraper;
 import classifier.ClassifierFactory.ClassifierType;
 import classifier.Result;
 import feature.selection.FeatureSelector;
 import feature.selection.InformationGainBuilder;
 import feature.selection.SelectorFactory;
+import feature.selection.StochasticBestFirstStep;
 import feature.selection.SymmetricalUncertBuilder;
 import feature.selection.PCASelectors.DFSelectorBuilder;
 import feature.selection.PCASelectors.DoubleSelectorBuilder;
 import feature.selection.PCASelectors.PCABuilder;
+import feature.selection.PCASelectors.RestrictedPCABuilder;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/double_df_naive_bayse.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/double_df_linear_svm.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/double_df_hyperbolic_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/pca_naive_bayse.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/pca_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/pca_hyperbolic_svm.txt";
 	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
 	
 	private final SelectorFactory selectorFactory;
@@ -60,9 +67,11 @@ public class FeatureSelectionThread extends Thread {
 				FeatureSelector selector = selectorFactory.build(numFeatures);
 				for (Entry<ClassifierType,BufferedWriter> next : outMap.entrySet()) {
 					Classifier classifier = ClassifierFactory.getClassifier(next.getKey(), sm, dir, selector);
+					if (selectorFactory instanceof StochasticBestFirstStep && next.getKey() != ClassifierType.NAIVE_BAYSE) ((SVMWraper)classifier).cancelOptimization();
 					Result res = classifier.crossValidation(3);
-					next.getValue().write("#features=" + numFeatures + " accuracy=" + res.accuracy() + "\n");
-					System.out.println(next.getKey() + ": #features=" + numFeatures + " accuracy=" + res.accuracy() + "\n");
+					String out = "#features=" + selector.numberOfFeatures() + " accuracy=" + res.accuracy() + "\n";
+					next.getValue().write(out);
+					System.out.print(next.getKey() + ": " + out);
 				}
 			}
 
@@ -113,40 +122,38 @@ public class FeatureSelectionThread extends Thread {
 		for (Entry<ClassifierType,BufferedWriter> next : outMap.entrySet()) {
 			next.getValue().close();
 		}
-		
-//		
-//		
-//		BufferedWriter bw = new BufferedWriter(new FileWriter(resFile));
-//		for (Entry<Integer, Double> entry : map.entrySet()) { 
-//			bw.write("#features=" + entry.getKey() + " accuracy=" + entry.getValue() + "\n");
-//			System.out.println("#features=" + entry.getKey() + " accuracy=" + entry.getValue() + "\n");
-//		}
-//		bw.close();
 
 	}
 	public static void main(String[] args) throws Exception {
 //		runIG();
 //		runSU();
-		runDFPCA();
+		runRestrictedPCA();
+//		runStochasticBestFirst();
 	}
 
-	private static void runIG() throws IOException, FileNotFoundException {
+	private static void runIG() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
 		//1:
 		threadsRunner(120, 12000, 120, 2, new File(SamplesManager.DATA_DIR), new InformationGainBuilder());
 	}
-	private static void runSU() throws IOException, FileNotFoundException {
+	private static void runSU() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
 		//1:
 		threadsRunner(120, 12000, 120, 2, new File(SamplesManager.DATA_DIR), new SymmetricalUncertBuilder());
 	}
-	private static void runDFPCA() throws IOException, FileNotFoundException {
+	private static void runRestrictedPCA() throws IOException, FileNotFoundException {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
-		//1:
-		threadsRunner(120, 12000, 120, 2, new File(SamplesManager.DATA_DIR), new DoubleSelectorBuilder(new DFSelectorBuilder(), new PCABuilder()) );
+		threadsRunner(400, 12000, 400, 3, new File(SamplesManager.DATA_DIR), new RestrictedPCABuilder() );
+	}
+	private static void runStochasticBestFirst() throws Exception {
+		File dir = new File(RESULTS_DIR_NAME);
+		if (!dir.isDirectory()) dir.mkdirs();
+		SamplesManager sm = new SamplesManager();
+		List<Sample> samples = sm.parseTrainData();
+		threadsRunner(120, 12000, 120, 1, new File(SamplesManager.DATA_DIR), new StochasticBestFirstStep(samples,new Random(1), new InfoGainAttributeEval()) );
 	}
 
 }
