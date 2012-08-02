@@ -10,13 +10,19 @@ import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;
 import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 
 public class PCASelector implements FeatureSelector {
 	private final int numFeatures;
+	private final Normalize normalizer;
 	private AttributeSelection selection;
+
 	public PCASelector(int numFeatures) {
 		this.numFeatures = numFeatures;
+		this.normalizer = new Normalize();
 	}
+
 	@Override
 	public List<Sample> selectFeatresFromTrain(List<Sample> trainSet) {
 		PrincipalComponents pca = new PrincipalComponents();
@@ -25,24 +31,27 @@ public class PCASelector implements FeatureSelector {
 		Instances instances = SamplesManager.asWekaInstances(trainSet);
 		selection = new AttributeSelection();
 		selection.setEvaluator(pca);
-		selection.setSearch(ranker);
-		try { 
+		try {
+			normalizer.setInputFormat(instances);
+			instances = Filter.useFilter(instances, normalizer);
+			selection.setSearch(ranker);
 			selection.SelectAttributes(instances);
 			instances = selection.reduceDimensionality(instances);
-			return SamplesManager.asSamplesList(instances,false);
-		} catch (Exception e ) {
+			return SamplesManager.asSamplesList(instances, false);
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
 	@Override
-	public List<Sample> filterFeaturesFromTest(List<Sample> testSet)
-			throws IllegalStateException {
-		if (selection == null) throw new IllegalStateException("Must invoke selectFeaturesFromTrain() first");
-		try { 
-			return SamplesManager.asSamplesList(selection.reduceDimensionality(SamplesManager.asWekaInstances(testSet)));
-		} catch (Exception e) { 
+	public List<Sample> filterFeaturesFromTest(List<Sample> testSet) throws IllegalStateException {
+		if (selection == null)
+			throw new IllegalStateException("Must invoke selectFeaturesFromTrain() first");
+		try {
+			return SamplesManager.asSamplesList(selection.reduceDimensionality(SamplesManager
+					.asWekaInstances(testSet)));
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -50,10 +59,11 @@ public class PCASelector implements FeatureSelector {
 
 	@Override
 	public int numberOfFeatures() {
-		if (selection == null) throw new IllegalStateException("Must invoke selectFeaturesFromTrain() first");
-		try { 
+		if (selection == null)
+			throw new IllegalStateException("Must invoke selectFeaturesFromTrain() first");
+		try {
 			return selection.numberAttributesSelected();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			e.printStackTrace();
 			return 0;
 		}
