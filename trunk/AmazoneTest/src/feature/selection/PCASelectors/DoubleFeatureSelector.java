@@ -1,9 +1,13 @@
-package feature.selection;
+package feature.selection.PCASelectors;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
+
+import feature.selection.FeatureSelector;
+import feature.selection.SelectorFactory;
 
 import sample.Attribute;
 import sample.Sample;
@@ -13,7 +17,7 @@ public class DoubleFeatureSelector implements FeatureSelector {
 	public static final int GROUP_SIZE = 500;
 	private final SelectorFactory firstBuilder, secondBuilder;
 	private final int numFeatures;
-	private int[] attributes;
+	private FeatureSelector firstSelector, secondSelector;
 	public DoubleFeatureSelector(SelectorFactory firstBuilder, SelectorFactory secondBuilder, int numFeatures) {
 		this.firstBuilder = firstBuilder;
 		this.secondBuilder = secondBuilder;
@@ -22,12 +26,14 @@ public class DoubleFeatureSelector implements FeatureSelector {
 	
 	@Override
 	public List<Sample> selectFeatresFromTrain(List<Sample> trainSet) {
-		List<Sample> samples;
+		List<Sample> firstListsSamples = new LinkedList<Sample>(), samples;
 		int n = (numFeatures/GROUP_SIZE) * GROUP_SIZE;
 		NavigableSet<Integer> firstGroups;
 		if (numFeatures > GROUP_SIZE) {
 			NavigableSet<Integer> allAtts = getAttributes(trainSet);
-			firstGroups = getAttributes(firstBuilder.build(n).selectFeatresFromTrain(trainSet));
+			firstSelector = firstBuilder.build(n);
+			firstListsSamples = firstSelector.selectFeatresFromTrain(trainSet);
+			firstGroups = getAttributes(firstListsSamples);
 			allAtts.removeAll(firstGroups);
 			int[] AttsToSelectFrom = asPrimitiveArray(allAtts);
 			samples = SamplesManager.reduceDimensions(trainSet, AttsToSelectFrom);
@@ -36,12 +42,11 @@ public class DoubleFeatureSelector implements FeatureSelector {
 			firstGroups = new TreeSet<Integer>();
 		}
 		samples = firstBuilder.build(GROUP_SIZE).selectFeatresFromTrain(samples);
-		Set<Integer> temp = getAttributes(samples);
-//		System.out.println(temp.size());
-		samples = secondBuilder.build(numFeatures - n).selectFeatresFromTrain(samples);
-		firstGroups.addAll(getAttributes(samples));
-		attributes = asPrimitiveArray(firstGroups);
-		return SamplesManager.reduceDimensions(trainSet, attributes);
+		Set<Integer> temp = getAttributes(samples); //TODO: no commit
+		System.out.println(temp.size());
+		secondSelector = secondBuilder.build(numFeatures - n);
+		samples = secondSelector.selectFeatresFromTrain(samples);
+		return SamplesManager.uniteAttributes(samples,firstListsSamples);
 	}
 
 
@@ -65,14 +70,14 @@ public class DoubleFeatureSelector implements FeatureSelector {
 	@Override
 	public List<Sample> filterFeaturesFromTest(List<Sample> testSet)
 			throws IllegalStateException {
-		if (attributes == null) throw new IllegalStateException("must first invoke selectFeaturesFromTrain()");
-		return SamplesManager.reduceDimensions(testSet, attributes);
+		if (firstSelector == null) throw new IllegalStateException("must first invoke selectFeaturesFromTrain()");
+		return SamplesManager.uniteAttributes(firstSelector.filterFeaturesFromTest(testSet), secondSelector.filterFeaturesFromTest(testSet));
 	}
 
 	@Override
 	public int numberOfFeatures() {
-		if (attributes == null) throw new IllegalStateException("must first invoke selectFeaturesFromTrain()");
-		return attributes.length;
+		if (firstSelector == null) throw new IllegalStateException("must first invoke selectFeaturesFromTrain()");
+		return firstSelector.numberOfFeatures() + secondSelector.numberOfFeatures();
 	}
 
 }

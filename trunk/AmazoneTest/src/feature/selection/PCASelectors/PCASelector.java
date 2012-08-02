@@ -1,12 +1,11 @@
-package feature.selection;
+package feature.selection.PCASelectors;
 
-import java.nio.channels.IllegalSelectorException;
 import java.util.List;
+
+import feature.selection.FeatureSelector;
 
 import sample.Sample;
 import sample.SamplesManager;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.PrincipalComponents;
 import weka.attributeSelection.Ranker;

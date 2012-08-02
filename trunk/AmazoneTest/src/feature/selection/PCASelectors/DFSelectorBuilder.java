@@ -1,4 +1,7 @@
-package feature.selection;
+package feature.selection.PCASelectors;
+
+import feature.selection.FeatureSelector;
+import feature.selection.SelectorFactory;
 
 public class DFSelectorBuilder implements SelectorFactory {
 	@Override

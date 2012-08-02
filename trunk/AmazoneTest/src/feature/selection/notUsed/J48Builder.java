@@ -1,5 +1,6 @@
-package feature.selection;
+package feature.selection.notUsed;
 
+import feature.selection.ClassifierBuilder;
 import weka.classifiers.trees.J48;
 
 public class J48Builder implements ClassifierBuilder {

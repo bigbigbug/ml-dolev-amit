@@ -1,6 +1,9 @@
-package feature.selection;
+package feature.selection.notUsed;
 
 import java.util.List;
+
+import feature.selection.FeatureSelector;
+import feature.selection.SelectorFactory;
 
 import sample.Sample;
 import sample.SamplesManager;
