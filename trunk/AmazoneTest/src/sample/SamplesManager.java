@@ -24,15 +24,15 @@ import weka.core.SparseInstance;
 
 
 import crawler.amazon.files_creator.DataFilesCreator;
-import feature.selection.DFSelector;
-import feature.selection.DFSelectorBuilder;
-import feature.selection.DoubleFeatureSelector;
 import feature.selection.FeatureSelector;
-import feature.selection.GeneticCFSFeatureSelector;
 import feature.selection.InformationGainBuilder;
 import feature.selection.InformationGainFeatureSelector;
-import feature.selection.PCABuilder;
-import feature.selection.PCASelector;
+import feature.selection.PCASelectors.DFSelector;
+import feature.selection.PCASelectors.DFSelectorBuilder;
+import feature.selection.PCASelectors.DoubleFeatureSelector;
+import feature.selection.PCASelectors.PCABuilder;
+import feature.selection.PCASelectors.PCASelector;
+import feature.selection.notUsed.GeneticCFSFeatureSelector;
 
 public class SamplesManager {
 
@@ -45,7 +45,10 @@ public class SamplesManager {
 	public static final String DATA_FILE_NAME = "train.data";
 	public static final String TEST_CLASSIFICATION_FILE_NAME = "test.label";
 	public static final String TEST_DATA_FILE_NAME = "test.data";
+	private static final int MAGIC = 20000;
 	private Map<Integer,Integer> idfMap;
+	
+	
 	public SamplesManager() {
 		idfMap = new HashMap<Integer, Integer>();
 	}
@@ -247,7 +250,7 @@ public class SamplesManager {
 			List<Attribute> atts = new ArrayList<Attribute>();
 			for (Attribute att : s.attributes) {
 				int idx = Arrays.binarySearch(selectedFeatures, att.attributeNumber);
-				if (idx >= 0) atts.add(new Attribute(idx, att.value));
+				if (idx >= 0) atts.add(new Attribute(att.attributeNumber, att.value));
 			}
 			result.add(new Sample(atts, s.classification));
 		}
@@ -269,14 +272,33 @@ public class SamplesManager {
 				int idx = curr.index(i);
 				double value = curr.value(curr.index(i));
 				Attribute attribute = new Attribute(
-						b?Integer.parseInt(curr.attribute(idx).name()):idx,value);
+						b?Integer.parseInt(curr.attribute(idx).name()):idx + MAGIC,value);
 				attributes.add(attribute);
 			}
 			samples.add(new Sample(attributes,(int)Math.round(curr.classValue())+1));
 		}
 		return samples;
 	}
-	
+	public static List<Sample> uniteAttributes(List<Sample> samples,
+			List<Sample> firstListsSamples) {
+		List<Sample> res = new ArrayList<Sample>();
+		Iterator<Sample> iter1 = samples.iterator();
+		Iterator<Sample> iter2 = firstListsSamples.iterator();
+		while (iter1.hasNext() && iter2.hasNext()) {
+			List<Attribute> atts = new ArrayList<Attribute>();
+			Sample s1 = iter1.next();
+			Sample s2 = iter2.next();
+			for (Attribute att : s1.attributes) {
+				atts.add(att);
+			}
+			for (Attribute att : s2.attributes) {
+				atts.add(att);
+			}
+			res.add(new Sample(atts, s1.classification));
+			if (s1.classification != s2.classification) throw new RuntimeException("god damnit, not the same order");
+		}
+		return res;
+	}
 	public static Instances asWekaInstances(List<Sample> samples) {
 
 		Set<Integer> attributes = new HashSet<Integer>();
@@ -338,7 +360,7 @@ public class SamplesManager {
 	public static void main(String[] args) throws Exception {
 		SamplesManager sm = new SamplesManager();
 		long start = System.currentTimeMillis();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new DFSelectorBuilder(), new PCABuilder(), 100));
+		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new DoubleFeatureSelector(new DFSelectorBuilder(), new PCABuilder(), 2100));
 		System.out.println(((double)System.currentTimeMillis()-start)/60000);
 		NavigableSet<Integer> set = new TreeSet<Integer>();
 		for (Sample s : l) { 
