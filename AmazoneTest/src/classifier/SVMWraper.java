@@ -265,14 +265,20 @@ public class SVMWraper implements Classifier {
 	
 	public PresisionTest confidance(int folds) {
 		System.err.println("start");
+		ParamOptimizationLevel oldPOL = pol;
+		pol = ParamOptimizationLevel.FULL;
 		param.probability = 1;
 		prob = new double[trainProb.l][3];
 		cls = new double[trainProb.l];
 		crossValidation(folds);
 		param.probability = 0;
+		pol = oldPOL;
 		return new PresisionTest(prob, cls);
 	}
 
+	public void cancelOptimization() {
+		pol = ParamOptimizationLevel.NONE;
+	}
 	public double[][] getLastOptMat() {
 		if (optimisationMatrix == null) throw new RuntimeException("Must incoke clasification first");
 		return optimisationMatrix;

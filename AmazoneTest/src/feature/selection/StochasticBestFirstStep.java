@@ -5,6 +5,8 @@ import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import feature.selection.notUsed.NaiveBayseBuilder;
+
 import sample.Sample;
 import sample.SamplesManager;
 import weka.attributeSelection.ASEvaluation;
@@ -12,7 +14,7 @@ import weka.attributeSelection.AttributeEvaluator;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
-public class StochasticBestFirstStep  {
+public class StochasticBestFirstStep implements FeatureSelector, SelectorFactory  {
 	private final double[] scores;
 	private int[] currentAttributes;
 	private List<Sample> currentSamples;
@@ -112,6 +114,34 @@ public class StochasticBestFirstStep  {
 			step(numSubsets,currentAttributes.length - numFeatures, numThreads, builder);
 		}
 	return currentAttributes;
+	}
+
+	@Override
+	public List<Sample> selectFeatresFromTrain(List<Sample> trainSet) {
+		return SamplesManager.reduceDimensions(trainSet, currentAttributes);
+	}
+
+	@Override
+	public List<Sample> filterFeaturesFromTest(List<Sample> testSet) throws IllegalStateException {
+		return SamplesManager.reduceDimensions(testSet, currentAttributes);
+	}
+
+	@Override
+	public int numberOfFeatures() {
+		return currentAttributes.length;
+	}
+
+	@Override
+	public FeatureSelector build() {
+		return build(100);
+	}
+
+	@Override
+	public FeatureSelector build(int numFeatures) {
+		while (currentAttributes.length > numFeatures) {
+			step(50,120,2,new NaiveBayseBuilder());
+		}
+		return this;
 	}
 
 
