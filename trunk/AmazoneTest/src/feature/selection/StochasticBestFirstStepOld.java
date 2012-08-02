@@ -11,7 +11,8 @@ package feature.selection;
 //import weka.core.Instances;
 //import weka.core.OptionHandler;
 //
-//public class StochasticBestFirstStep extends ASSearch implements
+public class StochasticBestFirstStepOld {}
+//	extends ASSearch implements
 //		StartSetHandler {
 //	private String startSet = null;
 //
