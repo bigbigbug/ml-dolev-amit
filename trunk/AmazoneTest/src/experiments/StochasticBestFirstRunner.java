@@ -15,9 +15,9 @@ import weka.attributeSelection.InfoGainAttributeEval;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 import feature.selection.ClassifierBuilder;
-import feature.selection.J48Builder;
-import feature.selection.NaiveBayseBuilder;
 import feature.selection.StochasticBestFirstStep;
+import feature.selection.notUsed.J48Builder;
+import feature.selection.notUsed.NaiveBayseBuilder;
 
 public class StochasticBestFirstRunner {
 	public static void runner(List<Sample> samples, BufferedWriter writer, int gap, int numThreads,AttributeEvaluator attributeEvaluator
@@ -33,7 +33,7 @@ public class StochasticBestFirstRunner {
 			Evaluation eval = new Evaluation(instances);
 			eval.crossValidateModel(builder.build(), instances, 3, new Random(11));
 			writer.write("#features=" + atts.length + " accuracy=" + eval.pctCorrect() + "\n");
-			System.out.println("step");
+			System.out.println("#features=" + atts.length + " accuracy=" + eval.pctCorrect());
 		} while (atts.length > gap);
 		writer.close();
 	}
@@ -45,7 +45,7 @@ public class StochasticBestFirstRunner {
 		BufferedWriter writer = new BufferedWriter(sw);
 		
 		ClassifierType type = ClassifierType.NAIVE_BAYSE;
-		runner(samples, writer, 1200, 1, new InfoGainAttributeEval(), 5, new NaiveBayseBuilder(), type);
+		runner(samples, writer, 120, 1, new InfoGainAttributeEval(), 50, new NaiveBayseBuilder(), type);
 		System.out.println(sw.toString());
 	}
 }
