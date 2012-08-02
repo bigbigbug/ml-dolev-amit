@@ -1,4 +1,4 @@
-package feature.selection;
+package feature.selection.notUsed;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
+import feature.selection.FeatureSelector;
 
 import sample.Sample;
 import sample.SamplesManager;

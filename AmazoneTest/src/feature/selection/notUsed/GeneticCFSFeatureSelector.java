@@ -1,8 +1,10 @@
-package feature.selection;
+package feature.selection.notUsed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import feature.selection.FeatureSelector;
 
 import sample.Attribute;
 import sample.Sample;
