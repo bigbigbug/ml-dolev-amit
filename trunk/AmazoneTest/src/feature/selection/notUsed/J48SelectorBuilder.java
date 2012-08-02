@@ -25,7 +25,7 @@ public class J48SelectorBuilder implements SelectorFactory {
 	
 	@Override
 	public FeatureSelector build() {
-		return new J48FeatureSelector(j48, 750);
+		return new J48FeatureSelector(j48, 100);
 	}
 
 	@Override

@@ -22,7 +22,8 @@ public class J48FeatureSelector extends Object implements FeatureSelector {
 	private final J48 j48;
 	private final int numFeatures;
 	private int[] selectedAtts;
-	public J48FeatureSelector(J48 j48,int numFeatures) {
+	
+	public J48FeatureSelector(J48 j48, int numFeatures) {
 		this.j48 = j48;
 		this.numFeatures = numFeatures;
 	}
@@ -64,6 +65,8 @@ public class J48FeatureSelector extends Object implements FeatureSelector {
 			}
 		});
 		if (numFeatures > list.size()) return null;
+		System.out.println(list.size());
+
 		int i = 0;
 		int[] res = new int[numFeatures];
 		for (Entry<Integer, Integer> entry : list) {
