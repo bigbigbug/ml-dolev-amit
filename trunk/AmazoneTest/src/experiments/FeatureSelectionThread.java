@@ -24,16 +24,18 @@ import classifier.SVMWraper;
 import feature.selection.FeatureSelector;
 import feature.selection.InformationGainBuilder;
 import feature.selection.SelectorFactory;
+import feature.selection.StochasticBestFirstBuilder;
 import feature.selection.StochasticBestFirstStep;
+import feature.selection.StochasticBestFirstStepOld;
 import feature.selection.SymmetricalUncertBuilder;
 import feature.selection.PCASelectors.RestrictedPCABuilder;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/pca_naive_bayse.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/pca_linear_svm.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/pca_hyperbolic_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/new_stochastic_naive_nayes";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/new_stochastic_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/new_stochastic_hyperbolic_svm.txt";
 	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
-	
+
 	private final SelectorFactory selectorFactory;
 	private final File dir;
 	private final Map<ClassifierType,BufferedWriter> outMap;
@@ -74,55 +76,61 @@ public class FeatureSelectionThread extends Thread {
 		}
 	}
 
-
-	public static void threadsRunner(int numFeaturesFrom, int numFeaturesTo, int numFeaturesGap,
-			int numThreads,	File dataDir, SelectorFactory selectorFactory) throws IOException, FileNotFoundException {
+	public static void threadRunner (int[] features, int numThreads,	File dataDir, SelectorFactory selectorFactory) throws IOException, FileNotFoundException {
 		BlockingQueue<Integer> queue = new LinkedBlockingQueue<Integer>();
 		//fill the work queue:
-		for (int i = numFeaturesFrom; i <= numFeaturesTo; i += numFeaturesGap)
-			queue.add(i);
+		for (int x : features)
+			queue.add(x);
 
-		// create classifiers and output
-		File resFile;
-		Map<ClassifierType,BufferedWriter> outMap = new ConcurrentSkipListMap<ClassifierType, BufferedWriter>();
-		resFile = new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE);
-		if (resFile.exists()) resFile.delete();
-		resFile.createNewFile();
-		outMap.put(ClassifierType.NAIVE_BAYSE, new BufferedWriter(new FileWriter(resFile)));
-		resFile = new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR);
-		if (resFile.exists()) resFile.delete();
-		resFile.createNewFile();
-		outMap.put(ClassifierType.SVM_LINEAR, new BufferedWriter(new FileWriter(resFile)));
-		resFile = new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC);
-		if (resFile.exists()) resFile.delete();
-		resFile.createNewFile();
-		outMap.put(ClassifierType.SVM_HYPERBOLIC, new BufferedWriter(new FileWriter(resFile)));
-		
-		//the threads list, needed for later join
-		FeatureSelectionThread[] threads = new FeatureSelectionThread[numThreads];
-		//start all threads:
-		for (int i = 0; i < numThreads; i++) { 
-			threads[i] = new FeatureSelectionThread(selectorFactory, dataDir, queue, outMap);
-			threads[i].start();
-		}
-		//wait for all threads to finish
-		for (Thread t : threads) {
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		for (Entry<ClassifierType,BufferedWriter> next : outMap.entrySet()) {
-			next.getValue().close();
-		}
+				// create classifiers and output
+				File resFile;
+				Map<ClassifierType,BufferedWriter> outMap = new ConcurrentSkipListMap<ClassifierType, BufferedWriter>();
+				resFile = new File(FEATURE_SELECTION_EXP_RESULTS_BAYSE);
+				if (resFile.exists()) resFile.delete();
+				resFile.createNewFile();
+				outMap.put(ClassifierType.NAIVE_BAYSE, new BufferedWriter(new FileWriter(resFile)));
+				resFile = new File(FEATURE_SELECTION_EXP_RESULTS_LINEAR);
+				if (resFile.exists()) resFile.delete();
+				resFile.createNewFile();
+				outMap.put(ClassifierType.SVM_LINEAR, new BufferedWriter(new FileWriter(resFile)));
+				resFile = new File(FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC);
+				if (resFile.exists()) resFile.delete();
+				resFile.createNewFile();
+				outMap.put(ClassifierType.SVM_HYPERBOLIC, new BufferedWriter(new FileWriter(resFile)));
 
+				//the threads list, needed for later join
+				FeatureSelectionThread[] threads = new FeatureSelectionThread[numThreads];
+				//start all threads:
+				for (int i = 0; i < numThreads; i++) { 
+					threads[i] = new FeatureSelectionThread(selectorFactory, dataDir, queue, outMap);
+					threads[i].start();
+				}
+				//wait for all threads to finish
+				for (Thread t : threads) {
+					try {
+						t.join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				for (Entry<ClassifierType,BufferedWriter> next : outMap.entrySet()) {
+					next.getValue().close();
+				}
 	}
+	public static void threadsRunner(int numFeaturesFrom, int numFeaturesTo, int numFeaturesGap,
+			int numThreads,	File dataDir, SelectorFactory selectorFactory) throws IOException, FileNotFoundException {
+		int n = 0;
+		for (int i = numFeaturesFrom; i < numFeaturesTo; i += numFeaturesGap)
+			n++;
+		int[] arr = new int[n];
+		int j = 0;
+		for (int i = numFeaturesFrom; i < numFeaturesTo; i += numFeaturesGap)
+			arr[j++] = i;
+		threadRunner(arr, numThreads, dataDir, selectorFactory);
+	}
+	
 	public static void main(String[] args) throws Exception {
-		runIG();
-		runSU();
-		runRestrictedPCA();
-		runStochasticBestFirst();
+		runSlowStochasticBestFirst();
 	}
 
 	private static void runIG() throws Exception {
@@ -148,6 +156,17 @@ public class FeatureSelectionThread extends Thread {
 		SamplesManager sm = new SamplesManager();
 		List<Sample> samples = sm.parseTrainData();
 		threadsRunner(12000, 12000, -120, 1, new File(SamplesManager.DATA_DIR), new StochasticBestFirstStep(samples,new Random(1), new InfoGainAttributeEval()) );
+	}
+	
+	private static void runSlowStochasticBestFirst() throws Exception {
+		File dir = new File(RESULTS_DIR_NAME);
+		if (!dir.isDirectory()) dir.mkdirs();
+//		int[] arr = { 	283, 499, 1089, 1826, 2039, 2255, 2453, 2782, 3277, 4031,
+//				4215, 4396, 4621, 4721, 6012, 6111, 6208, 6361, 6382, 8022, 8136,
+//				8247, 8401, 8422, 10029, 10184, 10312, 10512, 10539,
+//		};
+		int[] arr = {9000, 1000};
+		threadRunner(arr, 1, new File(SamplesManager.DATA_DIR), new StochasticBestFirstBuilder());
 	}
 
 }
