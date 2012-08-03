@@ -1,8 +1,10 @@
 package classifier;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import libsvm.svm;
 import libsvm.svm_model;
@@ -116,9 +118,13 @@ public class SVMWraper implements Classifier {
 		optimizeParams(train, param);
 		double[] predictions = new double[test.l];
 		svm_model model = svm.svm_train(train, param);
+		int[] perm = createPerm(train);
 		for (int i = 0; i < test.l; i++) {
 			if ( param.probability == 1 ) {
-				svm.svm_predict_probability(model, test.x[i], prob[i]);
+				double[] permutedProbs = new double[3];
+				svm.svm_predict_probability(model, test.x[i], permutedProbs);
+				prob[i] = permute(perm,permutedProbs);
+				double pred = svm.svm_predict(model, test.x[i]);
 				cls[i] = test.y[i];
 				predictions[i] = 1;
 			} else {
@@ -126,6 +132,26 @@ public class SVMWraper implements Classifier {
 			}
 		}
 		return predictions;
+	}
+
+	private double[] permute(int[] perm, double[] permutedProbs) {
+		double res[] = new double[perm.length];
+		for (int i = 0; i < res.length; i++) {
+			res[perm[i]-1] = permutedProbs[i];
+		}
+		return res;
+	}
+
+	private int[] createPerm(svm_problem train) {
+		int perm[] = new int[3];
+		Set<Integer> seen = new HashSet<Integer>();
+		int i = 0;
+		for (double lable : train.y) {
+			if (seen.add(new Integer((int)lable)))
+				perm[i++] = (int) lable;
+			if (i>=3) break;
+		}
+		return perm;
 	}
 
 	// TODO when performing real tests increase the search
