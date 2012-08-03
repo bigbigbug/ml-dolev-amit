@@ -19,6 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import sample.Sample;
 import sample.SamplesManager;
 import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.SymmetricalUncertAttributeEval;
 import classifier.Classifier;
 import classifier.ClassifierFactory;
 import classifier.SVMWraper;
@@ -35,9 +36,9 @@ import feature.selection.PCASelectors.PCABuilder;
 import feature.selection.PCASelectors.RestrictedPCABuilder;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/pca_naive_bayse.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/pca_linear_svm.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/pca_hyperbolic_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/greedy_naive_bayse.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/greedy_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/greedy_hyperbolic_svm.txt";
 	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
 	
 	private final SelectorFactory selectorFactory;
@@ -127,13 +128,14 @@ public class FeatureSelectionThread extends Thread {
 	public static void main(String[] args) throws Exception {
 //		runIG();
 //		runSU();
-		runRestrictedPCA();
-//		runStochasticBestFirst();
+//		runRestrictedPCA();
+		runStochasticBestFirst();
 	}
 
 	private static void runIG() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
+		SymmetricalUncertAttributeEval ig;
 		//1:
 		threadsRunner(120, 12000, 120, 2, new File(SamplesManager.DATA_DIR), new InformationGainBuilder());
 	}
@@ -153,7 +155,7 @@ public class FeatureSelectionThread extends Thread {
 		if (!dir.isDirectory()) dir.mkdirs();
 		SamplesManager sm = new SamplesManager();
 		List<Sample> samples = sm.parseTrainData();
-		threadsRunner(120, 12000, 120, 1, new File(SamplesManager.DATA_DIR), new StochasticBestFirstStep(samples,new Random(1), new InfoGainAttributeEval()) );
+		threadsRunner(12000, 12000, -120, 1, new File(SamplesManager.DATA_DIR), new StochasticBestFirstStep(samples,new Random(1), new InfoGainAttributeEval()) );
 	}
 
 }
