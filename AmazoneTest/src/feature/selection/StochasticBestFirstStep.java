@@ -1,5 +1,6 @@
 package feature.selection;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
@@ -94,6 +95,7 @@ public class StochasticBestFirstStep implements FeatureSelector, SelectorFactory
 	}
 
 	private int[] removeFromCurrent(int[] remove) {
+		Arrays.sort(remove);
 		int[] res = new int[currentAttributes.length - remove.length];
 		int resI = 0;
 		int removeI = 0;
