@@ -1,26 +1,19 @@
 package feature.selection.notUsed;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import feature.selection.FeatureSelector;
-
-import sample.Attribute;
 import sample.Sample;
 import sample.SamplesManager;
 import weka.attributeSelection.AttributeSelection;
-import weka.attributeSelection.BestFirst;
-import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.GeneticSearch;
-import weka.attributeSelection.InfoGainAttributeEval;
-import weka.attributeSelection.Ranker;
 import weka.attributeSelection.WrapperSubsetEval;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
+import feature.selection.FeatureSelector;
 
 public class GeneticCFSFeatureSelector implements FeatureSelector {
 	AttributeSelection selection;
+	@SuppressWarnings("unused")
 	private final int numFeatures;
 	public GeneticCFSFeatureSelector(int numFeatures) {
 		this.numFeatures  = numFeatures;

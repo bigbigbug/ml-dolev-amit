@@ -8,15 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.NavigableMap;
-import java.util.TreeMap;
-
-import feature.selection.FeatureSelector;
 
 import sample.Sample;
 import sample.SamplesManager;
 import weka.classifiers.trees.J48;
 import weka.core.Instances;
+import feature.selection.FeatureSelector;
 
 public class J48FeatureSelector extends Object implements FeatureSelector {
 	private final J48 j48;
