@@ -30,7 +30,8 @@ public class PrecisionRecallParser {
 			String line;
 			while ((line= reader.readLine()) != null) {
 				writer.write(line.split(" = ")[0]);
-				writer.write(line.split("\\[")[1].replace(" ", "\t").replace("\\]", "\n"));
+				writer.write('\t');
+				writer.write(line.split("\\[")[1].replace(", ", "\t").replace("\\]", "\n"));
 				writer.write('\n');
 			}
 		}

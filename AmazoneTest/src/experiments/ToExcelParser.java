@@ -10,17 +10,21 @@ import java.util.regex.Pattern;
 
 public class ToExcelParser {
 	private static final String[] FILES  = {
-		"experiments/feature_selection/symm_naive_bayse.txt",
-		"experiments/feature_selection/symm_linear_svm.txt",
-		"experiments/feature_selection/symm_hyperbolic_svm.txt",
+//		"experiments/feature_selection/symm_naive_bayse.txt",
+//		"experiments/feature_selection/symm_linear_svm.txt",
+//		"experiments/feature_selection/symm_hyperbolic_svm.txt",
+//
+//		"experiments/feature_selection/info_gain_naive_bayse.txt",
+//		"experiments/feature_selection/info_gain_linear_svm.txt",
+//		"experiments/feature_selection/info_gain_hyperbolic_svm.txt",
+//
+//		"experiments/feature_selection/ReliefF_naive_bayse.txt",
+//		"experiments/feature_selection/ReliefF_linear_svm.txt",
+//		"experiments/feature_selection/ReliefF_hyperbolic_svm.txt",
 
-		"experiments/feature_selection/new_ig_naive_bayse.txt",
-		"experiments/feature_selection/new_ig_linear_svm.txt",
-		"experiments/feature_selection/new_ig_hyperbolic_svm.txt",
-
-		"experiments/feature_selection/ReliefF_naive_bayse.txt",
-		"experiments/feature_selection/ReliefF_linear_svm.txt",
-		"experiments/feature_selection/ReliefF_hyperbolic_svm.txt",
+		"experiments/feature_selection/pca_naive_bayse.txt",
+		"experiments/feature_selection/pca_linear_svm.txt",
+		"experiments/feature_selection/pca_hyperbolic_svm.txt",
 
 
 	};
