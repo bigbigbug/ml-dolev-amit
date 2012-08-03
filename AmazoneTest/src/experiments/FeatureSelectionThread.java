@@ -5,40 +5,33 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import sample.Sample;
 import sample.SamplesManager;
 import weka.attributeSelection.InfoGainAttributeEval;
-import weka.attributeSelection.SymmetricalUncertAttributeEval;
 import classifier.Classifier;
 import classifier.ClassifierFactory;
-import classifier.SVMWraper;
 import classifier.ClassifierFactory.ClassifierType;
 import classifier.Result;
+import classifier.SVMWraper;
 import feature.selection.FeatureSelector;
 import feature.selection.InformationGainBuilder;
 import feature.selection.SelectorFactory;
 import feature.selection.StochasticBestFirstStep;
 import feature.selection.SymmetricalUncertBuilder;
-import feature.selection.PCASelectors.DFSelectorBuilder;
-import feature.selection.PCASelectors.DoubleSelectorBuilder;
-import feature.selection.PCASelectors.PCABuilder;
 import feature.selection.PCASelectors.RestrictedPCABuilder;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/greedy_naive_bayse.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/greedy_linear_svm.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/greedy_hyperbolic_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/pca_naive_bayse.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/pca_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/pca_hyperbolic_svm.txt";
 	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
 	
 	private final SelectorFactory selectorFactory;
@@ -126,16 +119,15 @@ public class FeatureSelectionThread extends Thread {
 
 	}
 	public static void main(String[] args) throws Exception {
-//		runIG();
-//		runSU();
-//		runRestrictedPCA();
+		runIG();
+		runSU();
+		runRestrictedPCA();
 		runStochasticBestFirst();
 	}
 
 	private static void runIG() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
-		SymmetricalUncertAttributeEval ig;
 		//1:
 		threadsRunner(120, 12000, 120, 2, new File(SamplesManager.DATA_DIR), new InformationGainBuilder());
 	}
