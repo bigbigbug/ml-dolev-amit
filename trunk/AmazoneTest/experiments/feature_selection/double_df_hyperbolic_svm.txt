@@ -1,0 +1,2 @@
+#features=120 accuracy=0.5415178571428572
+#features=1120 accuracy=0.49107142857142855
