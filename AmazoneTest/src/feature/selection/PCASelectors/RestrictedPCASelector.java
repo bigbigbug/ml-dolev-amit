@@ -18,13 +18,10 @@ import feature.selection.FeatureSelector;
 
 public class RestrictedPCASelector implements FeatureSelector {
 
-//	private static final double VAR_jump = 0.95;
-	
 	private final double var;
 	
 	private  Map<Integer,Double> max;
 	private  Map<Integer,Double> min;
-//	private Normalize normalizer;
 	
 	private AttributeSelection selection;
 	private int[] firstAttributes;

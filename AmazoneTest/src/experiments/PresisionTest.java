@@ -26,14 +26,12 @@ public class PresisionTest {
 	private static final String RESULTS_DIR_NAME = "experiments/precision_recall/";
 
 	public static void main(String[] args) throws IOException {
-
 		ClassifierType type;
 //		type = ClassifierType.SVM_HYPERBOLIC;
-		type = ClassifierType.SVM_LINEAR;
-//		type = ClassifierType.NAIVE_BAYSE;
+//		type = ClassifierType.SVM_LINEAR;
+		type = ClassifierType.NAIVE_BAYSE;
 		Classifier cls = ClassifierFactory.getClassifier(type, new SamplesManager(), new File(
 				SamplesManager.DATA_DIR), new SymmetricalUncertFeatureSelector(840));
-
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory())
 			dir.mkdirs();

@@ -5,18 +5,15 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Random;
 
-import classifier.ClassifierFactory;
-import classifier.ClassifierFactory.ClassifierType;
-
 import sample.Sample;
 import sample.SamplesManager;
 import weka.attributeSelection.AttributeEvaluator;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
+import classifier.ClassifierFactory.ClassifierType;
 import feature.selection.ClassifierBuilder;
 import feature.selection.StochasticBestFirstStep;
-import feature.selection.notUsed.J48Builder;
 import feature.selection.notUsed.NaiveBayseBuilder;
 
 public class StochasticBestFirstRunner {
