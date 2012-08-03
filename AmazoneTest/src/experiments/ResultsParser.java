@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ResultsParser {
-	private static final String RESULTS_FILE = "experiments/feature_selection/info_gain_hyperbolic_svm.txt";
+	private static final String RESULTS_FILE = "experiments/feature_selection/ReliefF_hyperbolic_svm.txt";
 	private static final Matcher ACCURACY_MATCHER = Pattern.compile("accuracy=").matcher("");
 	private static final Matcher NUM_FEATURES_MATCHER = Pattern.compile("[0-9]+").matcher("");
 	public static void main(String[] args) throws Exception {
