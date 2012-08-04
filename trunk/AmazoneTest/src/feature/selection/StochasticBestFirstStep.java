@@ -32,7 +32,7 @@ public class StochasticBestFirstStep implements FeatureSelector, SelectorFactory
 	private double[] evaluateScores(List<Sample> samples, AttributeEvaluator eval) throws Exception {
 		Instances instances = SamplesManager.asWekaInstances(samples);
 		((ASEvaluation)eval).buildEvaluator(instances);
-		int n = instances.numAttributes();
+		int n = instances.numAttributes()-1;
 		double[] res = new double[n];
 		for (int i = 0; i < n; i++) {
 			res[i] = eval.evaluateAttribute(i);
