@@ -9,11 +9,13 @@ public class Result {
 	public final double[][] confMat;
 	public final int numSamples;
 	public final int correctSamples;
+	public final boolean correctArr[];
 	
 	public Result(double[][] confMat, double correctSamples, double numSamples) {
 		this.confMat = confMat;
 		this.correctSamples = new Double(correctSamples).intValue();
 		this.numSamples = new Double(numSamples).intValue();
+		this.correctArr = null; 
 	}
 
 	public Result(double[] expected, double[] predictions) {
@@ -33,11 +35,17 @@ public class Result {
 				confMat[i][j] = 0;
 			}
 		}
+		this.correctArr = new boolean[predictions.length];
 		for (int i = 0; i < predictions.length; i++) {
 			int exp = (new Double(expected[i])).intValue();
 			int pred = (new Double(predictions[i])).intValue();
 			confMat[exp-1][pred-1]++; 
-			if (exp == pred) correctSamplesCounter++;
+			if (exp == pred) {
+				correctSamplesCounter++;
+				correctArr[i] = true;
+			} else {
+				correctArr[i] = false;
+			}
 		}
 		correctSamples = correctSamplesCounter;
 	}
