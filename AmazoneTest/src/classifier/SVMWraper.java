@@ -92,8 +92,14 @@ public class SVMWraper implements Classifier {
 			foldResults[i] = privateTrainTest(agrigatetProblem, folds[i]);
 			foldExpected[i] = folds[i].y; //
 		}
-
-		return new Result(concatAll(foldExpected), concatAll(foldResults));
+		
+		double orgRes[] = new double[trainProb.l];
+		double perRes[] = concatAll(foldResults);
+		for (int j = 0; j < orgRes.length; j++) {
+			int index = perm.get(j + prev);
+			orgRes[index] = perRes[j];
+		}
+		return new Result(trainProb.y,orgRes);
 	}
 
 	private List<Integer> randPerm(int length, Random rand) {
@@ -124,7 +130,6 @@ public class SVMWraper implements Classifier {
 				double[] permutedProbs = new double[3];
 				svm.svm_predict_probability(model, test.x[i], permutedProbs);
 				prob[i] = permute(perm,permutedProbs);
-				double pred = svm.svm_predict(model, test.x[i]);
 				cls[i] = test.y[i];
 				predictions[i] = 1;
 			} else {
@@ -154,18 +159,17 @@ public class SVMWraper implements Classifier {
 		return perm;
 	}
 
-	// TODO when performing real tests increase the search
-	private static final int C_MIN_POWER = -5; // -5
-	private static final int C_MAX_POWER = 15; // +5
-	private static final int G_MIN_POWER = -15; // -9
-	private static final int G_MAX_POWER = 3; // 0 not sure
+	private static final int C_MIN_POWER = -5; 
+	private static final int C_MAX_POWER = 15; 
+	private static final int G_MIN_POWER = -15; 
+	private static final int G_MAX_POWER = 3; 
 	private static final int PARAM_OPTIMIZE_FOLDS = 2;
 	private static final int PARAM_OPTIMIZE_POW = 2;
 	
 	enum ParamOptimizationLevel {
 		NONE, LOW, FULL;
 	} 
-	private ParamOptimizationLevel pol = ParamOptimizationLevel.LOW;
+	private ParamOptimizationLevel pol = ParamOptimizationLevel.FULL;
 
 	
 	private void optimizeParams(svm_problem problem, svm_parameter param) {
