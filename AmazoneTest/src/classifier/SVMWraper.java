@@ -96,7 +96,7 @@ public class SVMWraper implements Classifier {
 		double orgRes[] = new double[trainProb.l];
 		double perRes[] = concatAll(foldResults);
 		for (int j = 0; j < orgRes.length; j++) {
-			int index = perm.get(j + prev);
+			int index = perm.get(j);
 			orgRes[index] = perRes[j];
 		}
 		return new Result(trainProb.y,orgRes);
