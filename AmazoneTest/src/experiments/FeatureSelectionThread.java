@@ -161,11 +161,11 @@ public class FeatureSelectionThread extends Thread {
 	private static void runSlowStochasticBestFirst() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
-//		int[] arr = { 	283, 499, 1089, 1826, 2039, 2255, 2453, 2782, 3277, 4031,
-//				4215, 4396, 4621, 4721, 6012, 6111, 6208, 6361, 6382, 8022, 8136,
-//				8247, 8401, 8422, 10029, 10184, 10312, 10512, 10539,
-//		};
-		int[] arr = {9000, 1000};
+		int[] arr = { 	283, 499, 1089, 1826, 2039, 2255, 2453, 2782, 3277, 4031,
+				4215, 4396, 4621, 4721, 6012, 6111, 6208, 6361, 6382, 8022, 8136,
+				8247, 8401, 8422, 10029, 10184, 10312, 10512, 10539,
+		};
+//		int[] arr = {9000, 1000};
 		threadRunner(arr, 1, new File(SamplesManager.DATA_DIR), new StochasticBestFirstBuilder());
 	}
 
