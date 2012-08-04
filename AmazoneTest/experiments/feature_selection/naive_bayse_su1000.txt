@@ -1,4 +1,3 @@
-#features=3 accuracy=0.3986607142857143
 #features=33 accuracy=0.5544642857142857
 #features=63 accuracy=0.60625
 #features=93 accuracy=0.6334821428571429
