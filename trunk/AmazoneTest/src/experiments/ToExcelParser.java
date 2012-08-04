@@ -21,10 +21,18 @@ public class ToExcelParser {
 //		"experiments/feature_selection/ReliefF_naive_bayse.txt",
 //		"experiments/feature_selection/ReliefF_linear_svm.txt",
 //		"experiments/feature_selection/ReliefF_hyperbolic_svm.txt",
-
-		"experiments/feature_selection/pca_naive_bayse.txt",
-		"experiments/feature_selection/pca_linear_svm.txt",
-		"experiments/feature_selection/pca_hyperbolic_svm.txt",
+//
+//		"experiments/feature_selection/pca_naive_bayse.txt",
+//		"experiments/feature_selection/pca_linear_svm.txt",
+//		"experiments/feature_selection/pca_hyperbolic_svm.txt",
+		
+		"experiments/feature_selection/naive_bayse_ig1000.txt",
+		"experiments/feature_selection/linear_svm_ig1000.txt",
+		"experiments/feature_selection/hyperbolic_svm_ig1000.txt",
+		
+		"experiments/feature_selection/naive_bayse_su1000.txt",
+		"experiments/feature_selection/linear_svm_su1000.txt",
+		"experiments/feature_selection/hyperbolic_svm_su1000.txt",
 
 
 	};
