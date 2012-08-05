@@ -8,6 +8,7 @@ import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.core.Instances;
+import weka.gui.WekaTaskMonitor;
 
 public class InformationGainFeatureSelector implements FeatureSelector {
 	public InformationGainFeatureSelector(int numFeatures) {
@@ -15,6 +16,7 @@ public class InformationGainFeatureSelector implements FeatureSelector {
 	}
 	private final int numFeatures;
 	private AttributeSelection selector;
+	private int classAttInd;
 	@Override
 	public List<Sample> selectFeatresFromTrain(List<Sample> trainSet) {
 		selector = new AttributeSelection();
@@ -25,6 +27,7 @@ public class InformationGainFeatureSelector implements FeatureSelector {
 		selector.setEvaluator(ig);
 		try {
 			Instances instacnes = SamplesManager.asWekaInstances(trainSet);
+			this.classAttInd = instacnes.classIndex();
 			selector.SelectAttributes(instacnes);
 			return SamplesManager.asSamplesList(selector.reduceDimensionality(instacnes));
 		} catch (Exception e) {
@@ -38,7 +41,10 @@ public class InformationGainFeatureSelector implements FeatureSelector {
 			throws IllegalStateException {
 		if (selector == null) throw new IllegalStateException("Must invoke selectFeatureFromTrain() first");
 		try { 
-			return SamplesManager.asSamplesList(selector.reduceDimensionality(SamplesManager.asWekaInstances(testSet)));
+			Instances wkeaTest = SamplesManager.asWekaInstances(testSet);
+			Instances wkeaReduce = selector.reduceDimensionality(wkeaTest);
+			System.err.println(wkeaTest.classIndex() == wkeaReduce.classIndex());
+			return SamplesManager.asSamplesList(wkeaReduce);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
