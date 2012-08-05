@@ -30,19 +30,19 @@ public class DataFilesCreator {
 	 * @param args
 	 */
 	public static final String RAW_DIR_NAME = "data/lenses/raw";
-	public static final String RESULT_DIR_NAME = "data/lenses/processed";
+	public static final String RESULT_DIR_NAME = "data/lenses/temp";
 	public static final long SEED = 5;
 	public static final int NUM_REVIEWS = 3200;
 	public static final double PER_PRO = 0.3333;
 	public static final double PER_AGAINST = 0.3333;
 	public static final double PER_NEUTRAL = 0.3333;
 	private static final double PERCENT_TEST = 0.3;
-	
+
 	private List<Review> against;
 	private List<Review> neutrals;
 	private List<Review> pros;
 	private Set<Review> allReviews;
-	
+
 	public static void main(String[] args) throws Exception {
 		File dir = new File(RAW_DIR_NAME);
 		if (!dir.isDirectory()) throw new FileNotFoundException("The data should be in data/lenses");
@@ -50,9 +50,9 @@ public class DataFilesCreator {
 		if (!resultDir.isDirectory()) resultDir.mkdirs(); 
 		DataFilesCreator creator = new DataFilesCreator();
 		creator.parse(dir, resultDir);
-		
+
 	}
-	
+
 	public void parse(File rawDataDir,File resultDir) throws IOException, FileNotFoundException , ParseException {
 		File[] files = rawDataDir.listFiles(new FilenameFilter() {
 			@Override
@@ -72,7 +72,7 @@ public class DataFilesCreator {
 		}
 		Random r = new Random(SEED);
 		List<Review> reviews = choseRandomReviews(NUM_REVIEWS,r);
-//		createMaps(reviews);
+		//		createMaps(reviews);
 		writeFiles(reviews,r,resultDir);
 	}
 	private void writeFiles(List<Review> reviews,Random r,File outDir) throws IOException  {
@@ -119,7 +119,7 @@ public class DataFilesCreator {
 		map.write("against 1\n");
 		map.write("neutral 2\n");
 		map.write("pro 3\n");
-		
+
 	}
 
 	private void writeData(Review rev, BufferedWriter data, int i) throws IOException {
@@ -129,7 +129,7 @@ public class DataFilesCreator {
 		for (Entry<String,Integer> e : rev.titleWords.entrySet()) { 
 			data.write(i + " " + stringToId.get(e.getKey()) + " " + e.getValue() + "\n");
 		}
-		
+
 	}
 	private final Map<String,Integer> stringToId = new HashMap<String, Integer>();
 	private final Map<Integer,String> idToString = new HashMap<Integer, String>();
@@ -141,21 +141,23 @@ public class DataFilesCreator {
 			addListToMap(rev.titleWords);
 		}
 		writeMap(idToString, new File("vocabulary.txt"));
-		
+
 	}
 
 	private void writeMap(Map<Integer, String> orig, File file) {
-		try { if (file.exists()) file.delete();
-		file.createNewFile();
-		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-		NavigableMap<Integer,String> ordered = new TreeMap<Integer, String>(orig);
-		for (Entry<Integer, String> entry : ordered.entrySet()) { 
-			writer.write(entry.getValue() + "\n");
-		}
+		try { 
+			if (file.exists()) file.delete();
+			file.createNewFile();
+			BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+			NavigableMap<Integer,String> ordered = new TreeMap<Integer, String>(orig);
+			for (Entry<Integer, String> entry : ordered.entrySet()) { 
+				writer.write(entry.getValue() + "\n");
+			}
+			writer.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private void addListToMap(Map<String, Integer> reviewWords) {
@@ -165,7 +167,7 @@ public class DataFilesCreator {
 			stringToId.put(s, id);
 			idToString.put(id, s);
 		}
-		
+
 	}
 
 	private List<Review> choseRandomReviews(int numReviews, Random r) {

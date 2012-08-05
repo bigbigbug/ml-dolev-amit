@@ -23,11 +23,8 @@ public class Review {
 	private final String review;
 	public final Classification classification;
 	public final Description description;
-	private boolean useBiGrams = true;
+	private boolean useBiGrams = false;
 
-	public void setUseBiGrams(boolean useBiGrams) {
-		this.useBiGrams = useBiGrams;
-	}
 	public Review(String line,Description description) throws ParseException {
 		String[] arr = line.split("\",\"",-1);
 		for (int i = 0;i < arr.length; i++) { 
