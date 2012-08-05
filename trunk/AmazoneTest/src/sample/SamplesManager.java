@@ -301,19 +301,23 @@ public class SamplesManager {
 		return res;
 	}
 	public static Instances asWekaInstances(List<Sample> samples) {
-
-		Set<Integer> attributes = new HashSet<Integer>();
-		for (Sample s : samples) 
-			for (Attribute att : s.attributes)
-				attributes.add(att.attributeNumber);
 		
-		Map<Integer,Integer> id2ind = new HashMap<Integer, Integer>();
+		int numAtt = MAGIC;
+
+//		Set<Integer> attributes = new HashSet<Integer>();
+//		for (Sample s : samples) 
+//			for (Attribute att : s.attributes)
+//				attributes.add(att.attributeNumber);
+		
+//		Map<Integer,Integer> id2ind = new HashMap<Integer, Integer>();
 		ArrayList<weka.core.Attribute> instancesAtt = new ArrayList<weka.core.Attribute>();
-		Integer j = 0;
-		for (Integer i : attributes) {
-			weka.core.Attribute newAtt = new weka.core.Attribute(i.toString());
-			id2ind.put(i, j);
-			instancesAtt.add(j++,newAtt);
+//		Integer j = 0;
+//		for (Integer i : attributes) {
+		for (int i = 0; i<numAtt; i++) {
+			weka.core.Attribute newAtt = new weka.core.Attribute(Integer.toString(i));
+//			id2ind.put(i, j);
+//			instancesAtt.add(j++,newAtt);
+			instancesAtt.add(i,newAtt);
 			
 		}
 		List<String> labels = new LinkedList<String>();
@@ -321,24 +325,27 @@ public class SamplesManager {
 		labels.add("2");
 		labels.add("3");
 
-		instancesAtt.add(j, new weka.core.Attribute("class",labels));
+		instancesAtt.add(numAtt, new weka.core.Attribute("class",labels));
 
 		Instances data = new Instances("trainData", instancesAtt, samples.size());
 
-		data.setClass(instancesAtt.get(j));
+		data.setClass(instancesAtt.get(numAtt));
 		for (Sample s : samples) {
 			int size = s.attributes.size()+1;
 			int attIndex[] = new int[size]; 
 			double attVals[] = new double[size];
 			int location = 0;
 			for (Attribute nextAtt : s.attributes) {
-				Integer newIndex = id2ind.get(nextAtt.attributeNumber);
-				if (newIndex == null) continue;
-				attIndex[location] = newIndex; 
+//				Integer newIndex = id2ind.get(nextAtt.attributeNumber);
+//				if (newIndex == null) continue;
+				if (nextAtt.attributeNumber >= numAtt) continue;
+//				attIndex[location] = newIndex; 
+				attIndex[location] = nextAtt.attributeNumber; 
 				attVals[location] = nextAtt.value;
 				location++;
 			}
-			attIndex[location] = j; 
+//			attIndex[location] = j; 
+			attIndex[location] = numAtt; 
 			attVals[location] = s.classification-1;
 			data.add(new SparseInstance(1.0, attVals, attIndex, size));
 		}
