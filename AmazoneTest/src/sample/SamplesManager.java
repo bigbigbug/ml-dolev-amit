@@ -18,6 +18,15 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import classifier.Result;
+import classifier.SVMWraper;
+
+import weka.attributeSelection.AttributeSelection;
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
+import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.NaiveBayesMultinomial;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
@@ -48,8 +57,8 @@ public class SamplesManager {
 	public static final String TEST_DATA_FILE_NAME = "test.data";
 	private static final int MAGIC = 20000;
 	private Map<Integer,Integer> idfMap;
-	
-	
+
+
 	public SamplesManager() {
 		idfMap = new HashMap<Integer, Integer>();
 	}
@@ -244,7 +253,7 @@ public class SamplesManager {
 		if (featureSelector == null) throw new IllegalStateException("Must invoke parseTrainData() first");
 		return featureSelector.numberOfFeatures();
 	}
-	
+
 	public static List<Sample> reduceDimensions(List<Sample> samples, int[] selectedFeatures) {
 		List<Sample> result = new ArrayList<Sample>();
 		for (Sample s : samples) {
@@ -257,11 +266,11 @@ public class SamplesManager {
 		}
 		return result;
 	}
-	
+
 	public static List<Sample> asSamplesList(Instances instances) {
 		return asSamplesList(instances,true);
 	}
-	
+
 	public static List<Sample> asSamplesList(Instances instances, boolean b) {
 		List<Sample> samples = new ArrayList<Sample>();
 		Iterator<Instance> iter = instances.iterator();
@@ -301,24 +310,28 @@ public class SamplesManager {
 		return res;
 	}
 	public static Instances asWekaInstances(List<Sample> samples) {
+		Set<Integer> set = new HashSet<Integer>();
+		for (Sample s : samples) 
+			for (Attribute a : s.attributes)
+				set.add(a.attributeNumber);
 		
-		int numAtt = MAGIC;
+		int numAtt = set.size();
 
-//		Set<Integer> attributes = new HashSet<Integer>();
-//		for (Sample s : samples) 
-//			for (Attribute att : s.attributes)
-//				attributes.add(att.attributeNumber);
-		
-//		Map<Integer,Integer> id2ind = new HashMap<Integer, Integer>();
+		//		Set<Integer> attributes = new HashSet<Integer>();
+		//		for (Sample s : samples) 
+		//			for (Attribute att : s.attributes)
+		//				attributes.add(att.attributeNumber);
+
+		//		Map<Integer,Integer> id2ind = new HashMap<Integer, Integer>();
 		ArrayList<weka.core.Attribute> instancesAtt = new ArrayList<weka.core.Attribute>();
-//		Integer j = 0;
-//		for (Integer i : attributes) {
+		//		Integer j = 0;
+		//		for (Integer i : attributes) {
 		for (int i = 0; i<numAtt; i++) {
 			weka.core.Attribute newAtt = new weka.core.Attribute(Integer.toString(i));
-//			id2ind.put(i, j);
-//			instancesAtt.add(j++,newAtt);
+			//			id2ind.put(i, j);
+			//			instancesAtt.add(j++,newAtt);
 			instancesAtt.add(i,newAtt);
-			
+
 		}
 		List<String> labels = new LinkedList<String>();
 		labels.add("1");
@@ -331,20 +344,72 @@ public class SamplesManager {
 
 		data.setClass(instancesAtt.get(numAtt));
 		for (Sample s : samples) {
-			int size = s.attributes.size()+1;
+			int size = 0;
+			for (Attribute a : s.attributes) {
+				if (a.attributeNumber < numAtt) size++;
+			}
+			size++;
 			int attIndex[] = new int[size]; 
 			double attVals[] = new double[size];
 			int location = 0;
 			for (Attribute nextAtt : s.attributes) {
-//				Integer newIndex = id2ind.get(nextAtt.attributeNumber);
-//				if (newIndex == null) continue;
+				//				Integer newIndex = id2ind.get(nextAtt.attributeNumber);
+				//				if (newIndex == null) continue;
 				if (nextAtt.attributeNumber >= numAtt) continue;
-//				attIndex[location] = newIndex; 
+				//				attIndex[location] = newIndex; 
 				attIndex[location] = nextAtt.attributeNumber; 
 				attVals[location] = nextAtt.value;
 				location++;
 			}
-//			attIndex[location] = j; 
+			//			attIndex[location] = j; 
+			attIndex[location] = numAtt; 
+			attVals[location] = s.classification-1;
+			data.add(new SparseInstance(1.0, attVals, attIndex, size));
+		}
+		return data;
+	}
+	public static Instances asWekaInstances(List<Sample> samples,int numFeatures) {
+
+		int numAtt = numFeatures;
+
+
+		//		Map<Integer,Integer> id2ind = new HashMap<Integer, Integer>();
+		ArrayList<weka.core.Attribute> instancesAtt = new ArrayList<weka.core.Attribute>();
+		//		Integer j = 0;
+		//		for (Integer i : attributes) {
+		for (int i = 0; i<numAtt; i++) {
+			weka.core.Attribute newAtt = new weka.core.Attribute(Integer.toString(i));
+			//			id2ind.put(i, j);
+			//			instancesAtt.add(j++,newAtt);
+			instancesAtt.add(i,newAtt);
+
+		}
+		List<String> labels = new LinkedList<String>();
+		labels.add("1");
+		labels.add("2");
+		labels.add("3");
+
+		instancesAtt.add(numAtt, new weka.core.Attribute("class",labels));
+
+		Instances data = new Instances("testData", instancesAtt, samples.size());
+
+		data.setClass(instancesAtt.get(numAtt));
+		for (Sample s : samples) {
+			int size = 0;
+			for (Attribute a : s.attributes) {
+				if (a.attributeNumber < numAtt) size++;
+			}
+			size++;
+			int attIndex[] = new int[size]; 
+			double attVals[] = new double[size];
+			int location = 0;
+			for (Attribute nextAtt : s.attributes) {
+				if (nextAtt.attributeNumber >= numAtt) continue;
+				attIndex[location] = nextAtt.attributeNumber; 
+				attVals[location] = nextAtt.value;
+				location++;
+			}
+			//			attIndex[location] = j; 
 			attIndex[location] = numAtt; 
 			attVals[location] = s.classification-1;
 			data.add(new SparseInstance(1.0, attVals, attIndex, size));
@@ -366,17 +431,58 @@ public class SamplesManager {
 		return arr;
 	}
 	public static void main(String[] args) throws Exception {
+		int NUM_ATTS = 3000;
+		
 		SamplesManager sm = new SamplesManager();
-		long start = System.currentTimeMillis();
-		List<Sample> l = sm.parseTrainData(new File(DATA_DIR),DATA_FILE_NAME,CLASSIFICATION_FILE_NAME,new RestrictedPCASelector(200));
-		System.out.println(((double)System.currentTimeMillis()-start)/60000);
-		NavigableSet<Integer> set = new TreeSet<Integer>();
-		for (Sample s : l) { 
-			for (Attribute a : s.attributes) {
-				set.add(a.attributeNumber);
-			}
+		List<Sample> l1 = sm.parseTrainData();
+		List<Sample> l2 = sm.parseTestData();
+		Instances train = asWekaInstances(l1);
+		Instances test = asWekaInstances(l2, train.numAttributes()-1);
+
+		AttributeSelection filter = new AttributeSelection();  // package weka.filters.supervised.attribute!
+		InfoGainAttributeEval eval = new InfoGainAttributeEval();
+		Ranker search = new Ranker();
+		search.setNumToSelect(NUM_ATTS);
+		filter.setEvaluator(eval);
+		filter.setSearch(search);
+		
+		filter.SelectAttributes(train);
+		train = filter.reduceDimensionality(train);
+		test = filter.reduceDimensionality(test);
+		
+//		l1 = SamplesManager.asSamplesList(train);
+//		l2 = SamplesManager.asSamplesList(test);
+//		SVMWraper wrapper = new SVMWraper(l1, l2);
+//		wrapper.setHyperbolic();
+//		Result res = wrapper.trainTest();
+//		
+//		System.out.println("hyperbolic");
+//		System.out.println(res.accuracy());
+//		System.out.println(res.confMatString());
+//		System.out.println(Arrays.toString(res.correctArr));
+		
+		Classifier classifier = new NaiveBayesMultinomial();
+		classifier.buildClassifier(train);
+		int numSamples = 0;
+		int numCorrect = 0;
+		boolean[] correctnessVector = new boolean[test.numInstances()];
+		int[][] confusion = new int[3][3];
+		int i = 0;
+		for (Instance inst : test) {
+			numSamples++;
+			if (Double.compare(inst.classValue(), classifier.classifyInstance(inst))== 0) {
+				numCorrect++;
+				correctnessVector[i++] = true;
+			} else correctnessVector[i++] = false;
+			confusion[(int)Math.round(inst.classValue())][(int)Math.round(classifier.classifyInstance(inst))] += 1;
 		}
-		System.out.println(set.size());
+		for (int[] arr : confusion) {
+			System.out.println(Arrays.toString(arr));
+		}
+		System.out.println(numSamples);
+		System.out.println(numCorrect);
+		System.out.println(((double)numCorrect)/numSamples);
+		System.out.println(Arrays.toString(correctnessVector));
 	}
 
 
