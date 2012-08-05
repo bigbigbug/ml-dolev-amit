@@ -29,8 +29,8 @@ public class ForwardStochastic implements FeatureSelector {
 		this.attsEvaluator = attsEvaluator;
 	}
 	
-	public static int DEF_SUBSET_SIZE = 100;
-	public static int DEF_NUM_SUBSETS = 10;
+	public static int DEF_SUBSET_SIZE = 50;
+	public static int DEF_NUM_SUBSETS = 200;
 	public static int DEF_NUM_THREADS = 2;
 	public static ClassifierBuilder DEF_FACTORY = new NaiveBayseBuilder();
 	public static Random DEF_RANDOM = new Random(111);

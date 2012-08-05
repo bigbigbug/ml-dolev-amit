@@ -442,47 +442,49 @@ public class SamplesManager {
 		AttributeSelection filter = new AttributeSelection();  // package weka.filters.supervised.attribute!
 		InfoGainAttributeEval eval = new InfoGainAttributeEval();
 		Ranker search = new Ranker();
-		search.setNumToSelect(NUM_ATTS);
+//		search.setNumToSelect(NUM_ATTS);
 		filter.setEvaluator(eval);
 		filter.setSearch(search);
 		
 		filter.SelectAttributes(train);
 		train = filter.reduceDimensionality(train);
 		test = filter.reduceDimensionality(test);
+		System.out.println("num features=" + filter.numberAttributesSelected());
+		System.out.println();
 		
-//		l1 = SamplesManager.asSamplesList(train);
-//		l2 = SamplesManager.asSamplesList(test);
-//		SVMWraper wrapper = new SVMWraper(l1, l2);
-//		wrapper.setHyperbolic();
-//		Result res = wrapper.trainTest();
-//		
-//		System.out.println("hyperbolic");
-//		System.out.println(res.accuracy());
-//		System.out.println(res.confMatString());
-//		System.out.println(Arrays.toString(res.correctArr));
+		l1 = SamplesManager.asSamplesList(train);
+		l2 = SamplesManager.asSamplesList(test);
+		SVMWraper wrapper = new SVMWraper(l1, l2);
+		wrapper.setHyperbolic();
+		Result res = wrapper.trainTest();
 		
-		Classifier classifier = new NaiveBayesMultinomial();
-		classifier.buildClassifier(train);
-		int numSamples = 0;
-		int numCorrect = 0;
-		boolean[] correctnessVector = new boolean[test.numInstances()];
-		int[][] confusion = new int[3][3];
-		int i = 0;
-		for (Instance inst : test) {
-			numSamples++;
-			if (Double.compare(inst.classValue(), classifier.classifyInstance(inst))== 0) {
-				numCorrect++;
-				correctnessVector[i++] = true;
-			} else correctnessVector[i++] = false;
-			confusion[(int)Math.round(inst.classValue())][(int)Math.round(classifier.classifyInstance(inst))] += 1;
-		}
-		for (int[] arr : confusion) {
-			System.out.println(Arrays.toString(arr));
-		}
-		System.out.println(numSamples);
-		System.out.println(numCorrect);
-		System.out.println(((double)numCorrect)/numSamples);
-		System.out.println(Arrays.toString(correctnessVector));
+		System.out.println("hyperbolic");
+		System.out.println(res.accuracy());
+		System.out.println(res.confMatString());
+		System.out.println(Arrays.toString(res.correctArr));
+		
+//		Classifier classifier = new NaiveBayesMultinomial();
+//		classifier.buildClassifier(train);
+//		int numSamples = 0;
+//		int numCorrect = 0;
+//		boolean[] correctnessVector = new boolean[test.numInstances()];
+//		int[][] confusion = new int[3][3];
+//		int i = 0;
+//		for (Instance inst : test) {
+//			numSamples++;
+//			if (Double.compare(inst.classValue(), classifier.classifyInstance(inst))== 0) {
+//				numCorrect++;
+//				correctnessVector[i++] = true;
+//			} else correctnessVector[i++] = false;
+//			confusion[(int)Math.round(inst.classValue())][(int)Math.round(classifier.classifyInstance(inst))] += 1;
+//		}
+//		for (int[] arr : confusion) {
+//			System.out.println(Arrays.toString(arr));
+//		}
+//		System.out.println(numSamples);
+//		System.out.println(numCorrect);
+//		System.out.println(((double)numCorrect)/numSamples);
+//		System.out.println(Arrays.toString(correctnessVector));
 	}
 
 

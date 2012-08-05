@@ -31,9 +31,9 @@ import feature.selection.SymmetricalUncertBuilder;
 import feature.selection.PCASelectors.RestrictedPCABuilder;
 
 public class FeatureSelectionThread extends Thread {
-	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/new_stochastic_naive_nayes";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/new_stochastic_linear_svm.txt";
-	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/new_stochastic_hyperbolic_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_BAYSE = "experiments/feature_selection/new_range_ig_naive_nayes";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_LINEAR = "experiments/feature_selection/new_range_ig_linear_svm.txt";
+	private static final String FEATURE_SELECTION_EXP_RESULTS_HYPERBOLIC = "experiments/feature_selection/new_range_ig_hyperbolic_svm.txt";
 	private static final String RESULTS_DIR_NAME = "experiments/feature_selection/";
 
 	private final SelectorFactory selectorFactory;
@@ -130,14 +130,18 @@ public class FeatureSelectionThread extends Thread {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		runSlowStochasticBestFirst();
+		runIG();
 	}
 
 	private static void runIG() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
 		if (!dir.isDirectory()) dir.mkdirs();
+		int[] arr = { 	283, 499, 1089, 1826, 2039, 2255, 2453, 2782, 3277, 4031,
+		4215, 4396, 4621, 4721, 6012, 6111, 6208, 6361, 6382, 8022, 8136,
+		8247, 8401, 8422, 10029, 10184, 10312, 10512, 10539,
+};
 		//1:
-		threadsRunner(120, 12000, 120, 2, new File(SamplesManager.DATA_DIR), new InformationGainBuilder());
+		threadRunner(arr, 2, new File(SamplesManager.DATA_DIR), new InformationGainBuilder());
 	}
 	private static void runSU() throws Exception {
 		File dir = new File(RESULTS_DIR_NAME);
