@@ -15,9 +15,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 
 import crawler.amazon.files_creator.Review.Classification;
 
@@ -137,6 +139,21 @@ public class DataFilesCreator {
 		}
 		for (Review rev : reviews) { 
 			addListToMap(rev.titleWords);
+		}
+		writeMap(idToString, new File("vocabulary.txt"));
+		
+	}
+
+	private void writeMap(Map<Integer, String> orig, File file) {
+		try { if (file.exists()) file.delete();
+		file.createNewFile();
+		BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+		NavigableMap<Integer,String> ordered = new TreeMap<Integer, String>(orig);
+		for (Entry<Integer, String> entry : ordered.entrySet()) { 
+			writer.write(entry.getValue() + "\n");
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 	}
