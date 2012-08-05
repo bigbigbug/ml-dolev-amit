@@ -47,7 +47,7 @@ import feature.selection.notUsed.GeneticCFSFeatureSelector;
 public class SamplesManager {
 
 	private FeatureSelector featureSelector;
-	public static final String DATA_DIR = DataFilesCreator.RESULT_DIR_NAME;
+	public static final String DATA_DIR = "data/lenses/temp";
 	private static final int DATA_DOC_IDX = 0;
 	private static final int DATA_WORD_IDX = 1;
 	private static final int DATA_COUNT_IDX = 2;
@@ -446,45 +446,45 @@ public class SamplesManager {
 		filter.setEvaluator(eval);
 		filter.setSearch(search);
 		
-		filter.SelectAttributes(train);
-		train = filter.reduceDimensionality(train);
-		test = filter.reduceDimensionality(test);
-		System.out.println("num features=" + filter.numberAttributesSelected());
-		System.out.println();
+//		filter.SelectAttributes(train);
+//		train = filter.reduceDimensionality(train);
+//		test = filter.reduceDimensionality(test);
+//		System.out.println("num features=" + filter.numberAttributesSelected());
+//		System.out.println();
+//		
+//		l1 = SamplesManager.asSamplesList(train);
+//		l2 = SamplesManager.asSamplesList(test);
+//		SVMWraper wrapper = new SVMWraper(l1, l2);
+//		wrapper.setHyperbolic();
+//		Result res = wrapper.trainTest();
+//		
+//		System.out.println("hyperbolic");
+//		System.out.println(res.accuracy());
+//		System.out.println(res.confMatString());
+//		System.out.println(Arrays.toString(res.correctArr));
 		
-		l1 = SamplesManager.asSamplesList(train);
-		l2 = SamplesManager.asSamplesList(test);
-		SVMWraper wrapper = new SVMWraper(l1, l2);
-		wrapper.setHyperbolic();
-		Result res = wrapper.trainTest();
-		
-		System.out.println("hyperbolic");
-		System.out.println(res.accuracy());
-		System.out.println(res.confMatString());
-		System.out.println(Arrays.toString(res.correctArr));
-		
-//		Classifier classifier = new NaiveBayesMultinomial();
-//		classifier.buildClassifier(train);
-//		int numSamples = 0;
-//		int numCorrect = 0;
-//		boolean[] correctnessVector = new boolean[test.numInstances()];
-//		int[][] confusion = new int[3][3];
-//		int i = 0;
-//		for (Instance inst : test) {
-//			numSamples++;
-//			if (Double.compare(inst.classValue(), classifier.classifyInstance(inst))== 0) {
-//				numCorrect++;
-//				correctnessVector[i++] = true;
-//			} else correctnessVector[i++] = false;
-//			confusion[(int)Math.round(inst.classValue())][(int)Math.round(classifier.classifyInstance(inst))] += 1;
-//		}
-//		for (int[] arr : confusion) {
-//			System.out.println(Arrays.toString(arr));
-//		}
-//		System.out.println(numSamples);
-//		System.out.println(numCorrect);
-//		System.out.println(((double)numCorrect)/numSamples);
-//		System.out.println(Arrays.toString(correctnessVector));
+		Classifier classifier = new NaiveBayesMultinomial();
+		classifier.buildClassifier(train);
+		int numSamples = 0;
+		int numCorrect = 0;
+		boolean[] correctnessVector = new boolean[test.numInstances()];
+		int[][] confusion = new int[3][3];
+		int i = 0;
+		for (Instance inst : test) {
+			numSamples++;
+			if (Double.compare(inst.classValue(), classifier.classifyInstance(inst))== 0) {
+				numCorrect++;
+				correctnessVector[i++] = true;
+			} else correctnessVector[i++] = false;
+			confusion[(int)Math.round(inst.classValue())][(int)Math.round(classifier.classifyInstance(inst))] += 1;
+		}
+		for (int[] arr : confusion) {
+			System.out.println(Arrays.toString(arr));
+		}
+		System.out.println(numSamples);
+		System.out.println(numCorrect);
+		System.out.println(((double)numCorrect)/numSamples);
+		System.out.println(Arrays.toString(correctnessVector));
 	}
 
 
