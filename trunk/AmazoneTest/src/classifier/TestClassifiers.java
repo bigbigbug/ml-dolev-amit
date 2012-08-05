@@ -18,10 +18,11 @@ public class TestClassifiers {
 //		ClassifierType type = ClassifierType.NAIVE_BAYSE;		// Accuracy: 0.658 (train-test), 0.704 (cross)
 		
 		Classifier cls = ClassifierFactory.getClassifier(type, new SamplesManager(),
-				 new File(SamplesManager.DATA_DIR), new InformationGainFeatureSelector(720));
+//				new File("./data/lenses/no_filter/"), FeatureSelector.NONE);
+				new File("./data/lenses/no_filter/"), new InformationGainFeatureSelector(2000));
 		
-//		Result res = cls.trainTest();
-		Result res = cls.crossValidation(10);
+		Result res = cls.trainTest();
+//		Result res = cls.crossValidation(10);
 		
 		System.err.println("Final Results");
 		System.err.println("Num Samples: " + res.numSamples);

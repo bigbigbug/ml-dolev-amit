@@ -177,7 +177,7 @@ public class SVMWraper implements Classifier {
 		double bestC = 0;
 		double bestG = 0;
 		int gFinish = G_MAX_POWER;
-		int gap = 2;
+		int gap = 1;
 		double bestAcc = 0;
 		if (pol.equals(ParamOptimizationLevel.NONE)) {
 			param.C = 1;
